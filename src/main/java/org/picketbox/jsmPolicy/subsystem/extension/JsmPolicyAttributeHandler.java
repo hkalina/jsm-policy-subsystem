@@ -43,6 +43,8 @@ class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
             
             System.err.println("JsmPolicyAttributeHandler.applyUpdateToRuntime(policy: "+currentValue.asString()+">"+resolvedValue.asString()+")");
             
+            PolicyManager.INSTANCE.setPolicy(resolvedValue.asString()); // TODO only for current server
+            
             //JsmPolicyService service = (JsmPolicyService) context.getServiceRegistry(true).getRequiredService(JsmPolicyService.createServiceName(name)).getValue();
             //service.setTick(resolvedValue.asLong());
             //context.completeStep();
