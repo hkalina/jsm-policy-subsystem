@@ -10,7 +10,7 @@
 
     <xs:complexType name="subsystemType">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element name="deploymemt-type" type="serverType"/>
+            <xs:element name="server" type="serverType"/>
         </xs:choice>
     </xs:complexType>
     <xs:complexType name="serverType">

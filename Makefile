@@ -7,3 +7,6 @@ install: compile
 compile:
 	mvn -Dmaven.test.skip=true clean install
 
+test:
+	mvn clean install
+

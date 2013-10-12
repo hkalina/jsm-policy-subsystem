@@ -54,7 +54,7 @@ public class JsmPolicyExtension implements Extension {
 
     private static final String RESOURCE_NAME = JsmPolicyExtension.class.getPackage().getName() + ".LocalDescriptions";
 
-    protected static final String TYPE = "type";
+    protected static final String TYPE = "server";
     protected static final String POLICY = "policy";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
     protected static final PathElement TYPE_PATH = PathElement.pathElement(TYPE);

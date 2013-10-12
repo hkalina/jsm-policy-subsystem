@@ -18,6 +18,6 @@ public class SubsystemBaseParsingTestCase extends AbstractSubsystemBaseTest {
 
     @Override
     protected String getSubsystemXml() throws IOException {
-        return readResource("subsystem.xml");
+    	return readResource("subsystem.xml");
     }
 }

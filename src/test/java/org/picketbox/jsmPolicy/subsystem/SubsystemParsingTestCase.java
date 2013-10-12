@@ -10,8 +10,6 @@ import org.jboss.as.subsystem.test.KernelServices;
 import org.jboss.dmr.ModelNode;
 import org.junit.Test;
 import org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension;
-import org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyService;
-
 import java.util.List;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
@@ -39,13 +37,14 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     /**
      * Tests that the xml is parsed into the correct operations
      */
+    
     @Test
     public void testParseSubsystem() throws Exception {
         //Parse the subsystem xml into operations
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
                         "   <servers>" +
-                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "       <server name=\"test-server\" policy=\"test.policy\"/>" +
                         "   </servers>" +
                         "</subsystem>";
         List<ModelNode> operations = super.parse(subsystemXml);
@@ -66,27 +65,29 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Then we will get the add type operation
         ModelNode addType = operations.get(1);
         Assert.assertEquals(ADD, addType.get(OP).asString());
-        Assert.assertEquals(12345, addType.get("policy").asLong());
+        Assert.assertEquals("test.policy", addType.get("policy").asString());
         addr = PathAddress.pathAddress(addType.get(OP_ADDR));
         Assert.assertEquals(2, addr.size());
         element = addr.getElement(0);
         Assert.assertEquals(SUBSYSTEM, element.getKey());
         Assert.assertEquals(JsmPolicyExtension.SUBSYSTEM_NAME, element.getValue());
         element = addr.getElement(1);
-        Assert.assertEquals("type", element.getKey());
-        Assert.assertEquals("tst", element.getValue());
+        Assert.assertEquals("server", element.getKey());
+        Assert.assertEquals("test-server", element.getValue());
     }
+    
 
     /**
      * Test that the model created from the xml looks as expected
      */
+    
     @Test
     public void testInstallIntoController() throws Exception {
         //Parse the subsystem xml and install into the controller
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
                         "   <servers>" +
-                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "       <server name=\"test-server\" policy=\"test.policy\"/>" +
                         "   </servers>" +
                         "</subsystem>";
         KernelServices services = super.installInController(subsystemXml);
@@ -96,23 +97,25 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Useful for debugging :-)
         //System.out.println(model);
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(JsmPolicyExtension.SUBSYSTEM_NAME));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("type"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type").hasDefined("tst"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("policy"));
-        Assert.assertEquals(12345, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst", "policy").asLong());
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server").hasDefined("test-server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server").hasDefined("policy"));
+        Assert.assertEquals("test.policy", model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString());
     }
+    
 
     /**
      * Starts a controller with a given subsystem xml and then checks that a second
      * controller started with the xml marshalled from the first one results in the same model
      */
+    
     @Test
     public void testParseAndMarshalModel() throws Exception {
         //Parse the subsystem xml and install into the first controller
         String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
+        		"<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
                         "   <servers>" +
-                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "       <server name=\"test-server\" policy=\"test.policy\"/>" +
                         "   </servers>" +
                         "</subsystem>";
         KernelServices servicesA = super.installInController(subsystemXml);
@@ -127,11 +130,13 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Make sure the models from the two controllers are identical
         super.compare(modelA, modelB);
     }
+    
 
     /**
      * Starts a controller with the given subsystem xml and then checks that a second
      * controller started with the operations from its describe action results in the same model
      */
+    
     @Test
     public void testDescribeHandler() throws Exception {
         //Parse the subsystem xml and install into the first controller
@@ -156,86 +161,81 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         super.compare(modelA, modelB);
 
     }
-
+    
+    
     /**
      * Tests that the subsystem can be removed
      */
+    
     @Test
     public void testSubsystemRemoval() throws Exception {
         //Parse the subsystem xml and install into the first controller
         String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
+        		"<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
                         "   <servers>" +
-                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "       <server name=\"test-server\" policy=\"test.policy\"/>" +
                         "   </servers>" +
                         "</subsystem>";
         KernelServices services = super.installInController(subsystemXml);
-
-        //Sanity check to test the service for 'tst' was there
-        services.getContainer().getRequiredService(JsmPolicyService.createServiceName("tst"));
-
+        
         //Checks that the subsystem was removed from the model
         super.assertRemoveSubsystemResources(services);
-
-        //Check that any services that were installed were removed here
-        try {
-            services.getContainer().getRequiredService(JsmPolicyService.createServiceName("tst"));
-            Assert.fail("Should have removed services");
-        } catch (Exception expected) {
-        }
+        
     }
-
+    
     @Test
     public void testExecuteOperations() throws Exception {
         String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
+        		"<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
                         "   <servers>" +
-                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "       <server name=\"test-server\" policy=\"test.policy\"/>" +
                         "   </servers>" +
                         "</subsystem>";
         KernelServices services = super.installInController(subsystemXml);
 
-        //Add another type
+        //Add new server
         PathAddress fooTypeAddr = PathAddress.pathAddress(
                 PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME),
-                PathElement.pathElement("type", "foo"));
+                PathElement.pathElement("server", "foo"));
         ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
         addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        addOp.get("policy").set(1000);
+        addOp.get("policy").set("foo.policy");
         ModelNode result = services.executeOperation(addOp);
         Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());
 
-
+        // Check state after add
         ModelNode model = services.readWholeModel();
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(JsmPolicyExtension.SUBSYSTEM_NAME));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("type"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type").hasDefined("tst"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("policy"));
-        Assert.assertEquals(12345, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst", "policy").asLong());
-
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type").hasDefined("foo"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "foo").hasDefined("policy"));
-        Assert.assertEquals(1000, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "foo", "policy").asLong());
-
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server").hasDefined("test-server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server").hasDefined("policy"));
+        Assert.assertEquals("test.policy", model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString()); // ????
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server").hasDefined("foo"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "foo").hasDefined("policy"));
+        Assert.assertEquals("foo.policy", model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "foo", "policy").asString());
+        
         //Call write-attribute
         ModelNode writeOp = new ModelNode();
         writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
         writeOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
         writeOp.get(NAME).set("policy");
-        writeOp.get(VALUE).set(3456);
+        writeOp.get(VALUE).set("second.policy");
         result = services.executeOperation(writeOp);
         Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());
-
+        
         //Check that write attribute took effect, this time by calling read-attribute instead of reading the whole model
         ModelNode readOp = new ModelNode();
         readOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
         readOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
         readOp.get(NAME).set("policy");
         result = services.executeOperation(readOp);
-        Assert.assertEquals(3456, checkResultAndGetContents(result).asLong());
-
-        JsmPolicyService service = (JsmPolicyService) services.getContainer().getService(JsmPolicyService.createServiceName("foo")).getValue();
-        Assert.assertEquals(3456, service.getTick());
+        Assert.assertEquals("second.policy", checkResultAndGetContents(result).asString());
+        
+        //Check that write attribute took effect using getPolicy
+        //JsmPolicyService service = (JsmPolicyService) services.getContainer().getService(JsmPolicyService.createServiceName("foo")).getValue();
+        //Assert.assertEquals(3456, service.getTick());
+        
     }
+    
 }
