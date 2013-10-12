@@ -12,7 +12,6 @@ import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceRegistry;
 import org.jboss.vfs.VirtualFile;
-//import org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyService;
 
 /**
  * An example deployment unit processor that does nothing. To add more deployment
@@ -39,7 +38,9 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
 
     @Override
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
-        /*
+        
+    	System.err.println("deploy()");
+    	/*
     	String name = phaseContext.getDeploymentUnit().getName();
         ResourceRoot root = phaseContext.getDeploymentUnit().getAttachment(Attachments.DEPLOYMENT_ROOT);
         JsmPolicyService service = getTrackerService(phaseContext.getServiceRegistry(), name);
@@ -55,7 +56,9 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
 
     @Override
     public void undeploy(DeploymentUnit context) {
-        /*
+        
+    	System.err.println("undeploy()");
+    	/*
     	context.getServiceRegistry();
         String name = context.getName();
         JsmPolicyService service = getTrackerService(context.getServiceRegistry(), name);

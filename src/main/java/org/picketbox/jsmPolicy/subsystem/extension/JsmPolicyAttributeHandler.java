@@ -6,16 +6,17 @@ import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
+import org.jboss.logging.Logger;
 
 /**
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  */
-class JsmPolicyTickHandler extends AbstractWriteAttributeHandler<Void> {
+class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
 
-    public static final JsmPolicyTickHandler INSTANCE = new JsmPolicyTickHandler();
+    public static final JsmPolicyAttributeHandler INSTANCE = new JsmPolicyAttributeHandler();
 
-    private JsmPolicyTickHandler() {
-        super(TypeDefinition.POLICY);
+    private JsmPolicyAttributeHandler() {
+        super(ServerDefinition.POLICY);
     }
 
 
@@ -36,14 +37,17 @@ class JsmPolicyTickHandler extends AbstractWriteAttributeHandler<Void> {
 
     protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
                                            ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
-        /*
+    	
     	if (attributeName.equals(JsmPolicyExtension.POLICY)) {
             final String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-            JsmPolicyService service = (JsmPolicyService) context.getServiceRegistry(true).getRequiredService(JsmPolicyService.createServiceName(name)).getValue();
-            service.setTick(resolvedValue.asLong());
-            context.completeStep();
+            
+            System.err.println("JsmPolicyAttributeHandler.applyUpdateToRuntime(policy: "+currentValue.asString()+">"+resolvedValue.asString()+")");
+            
+            //JsmPolicyService service = (JsmPolicyService) context.getServiceRegistry(true).getRequiredService(JsmPolicyService.createServiceName(name)).getValue();
+            //service.setTick(resolvedValue.asLong());
+            //context.completeStep();
         }
-        */
+        
         return false;
     }
 

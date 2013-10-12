@@ -19,15 +19,17 @@ import org.jboss.msc.service.ServiceName;
  *
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  */
-class TypeRemove extends AbstractRemoveStepHandler{
+class ServerRemove extends AbstractRemoveStepHandler{
 
-    public static final TypeRemove INSTANCE = new TypeRemove();
+    public static final ServerRemove INSTANCE = new ServerRemove();
 
-    private TypeRemove() {
+    private ServerRemove() {
     }
 
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
+    	
+    	System.err.println("ServerRemove!");
     	/*
     	String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         ServiceName name = JsmPolicyService.createServiceName(serverName);

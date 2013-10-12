@@ -5,16 +5,23 @@
            attributeFormDefault="unqualified"
            version="1.0">
 
-    <!-- The subsystem root element -->
     <xs:element name="subsystem" type="subsystemType"/>
 
     <xs:complexType name="subsystemType">
+        <xs:choice minOccurs="0" maxOccurs="1">
+            <xs:element name="servers" type="serversType"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="serversType">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element name="server" type="serverType"/>
         </xs:choice>
     </xs:complexType>
+
     <xs:complexType name="serverType">
         <xs:attribute name="name" use="required"/>
         <xs:attribute name="policy" use="optional"/>
     </xs:complexType>
+
 </xs:schema>

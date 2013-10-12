@@ -9,14 +9,15 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 
-import static org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension.TYPE;
-import static org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension.TYPE_PATH;
+import static org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension.SERVER;
+import static org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension.SERVER_PATH;
 
 /**
  * @author <a href="tcerar@redhat.com">Tomaz Cerar</a>
  */
-public class TypeDefinition extends SimpleResourceDefinition {
-    public static final TypeDefinition INSTANCE = new TypeDefinition();
+public class ServerDefinition extends SimpleResourceDefinition {
+
+	public static final ServerDefinition INSTANCE = new ServerDefinition();
 
     protected static final SimpleAttributeDefinition POLICY =
             new SimpleAttributeDefinitionBuilder(JsmPolicyExtension.POLICY, ModelType.STRING)
@@ -27,18 +28,17 @@ public class TypeDefinition extends SimpleResourceDefinition {
                     .setAllowNull(true)
                     .build();
 
-
-    private TypeDefinition() {
-        super(TYPE_PATH,
-                JsmPolicyExtension.getResourceDescriptionResolver(TYPE),
+    private ServerDefinition() {
+        super(SERVER_PATH,
+                JsmPolicyExtension.getResourceDescriptionResolver(SERVER),
                 //We always need to add an 'add' operation
-                TypeAdd.INSTANCE,
+                ServerAdd.INSTANCE,
                 //Every resource that is added, normally needs a remove operation
-                TypeRemove.INSTANCE);
+                ServerRemove.INSTANCE);
     }
 
     @Override
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(POLICY, null, JsmPolicyTickHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(POLICY, null, JsmPolicyAttributeHandler.INSTANCE);
     }
 }

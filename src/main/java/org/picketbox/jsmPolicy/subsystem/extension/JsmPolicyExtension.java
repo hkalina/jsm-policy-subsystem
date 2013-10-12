@@ -7,12 +7,10 @@ import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.SubsystemRegistration;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.descriptions.StandardResourceDescriptionResolver;
-import org.jboss.as.controller.operations.common.GenericSubsystemDescribeHandler;
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.parsing.ParseUtils;
 import org.jboss.as.controller.persistence.SubsystemMarshallingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.as.controller.registry.OperationEntry;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 import org.jboss.staxmapper.XMLElementReader;
@@ -26,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIBE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
@@ -54,10 +51,10 @@ public class JsmPolicyExtension implements Extension {
 
     private static final String RESOURCE_NAME = JsmPolicyExtension.class.getPackage().getName() + ".LocalDescriptions";
 
-    protected static final String TYPE = "server";
+    protected static final String SERVER = "server";
     protected static final String POLICY = "policy";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
-    protected static final PathElement TYPE_PATH = PathElement.pathElement(TYPE);
+    protected static final PathElement SERVER_PATH = PathElement.pathElement(SERVER);
 
     static StandardResourceDescriptionResolver getResourceDescriptionResolver(final String keyPrefix) {
         String prefix = SUBSYSTEM_NAME + (keyPrefix == null ? "" : "." + keyPrefix);
@@ -74,9 +71,8 @@ public class JsmPolicyExtension implements Extension {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
         final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(JsmPolicySubsystemDefinition.INSTANCE);
 
-
         //Add the type child
-        ManagementResourceRegistration typeChild = registration.registerSubModel(TypeDefinition.INSTANCE);
+        registration.registerSubModel(ServerDefinition.INSTANCE);
         subsystem.registerXMLElementWriter(parser);
     }
 
@@ -125,7 +121,7 @@ public class JsmPolicyExtension implements Extension {
                 String attr = reader.getAttributeLocalName(i);
                 String value = reader.getAttributeValue(i);
                 if (attr.equals("policy")) {
-                    TypeDefinition.POLICY.parseAndSetParameter(value, addTypeOperation, reader);
+                    ServerDefinition.POLICY.parseAndSetParameter(value, addTypeOperation, reader);
                 } else if (attr.equals("name")) {
                     name = value;
                 } else {
@@ -138,7 +134,7 @@ public class JsmPolicyExtension implements Extension {
             }
 
             //Add the 'add' operation for each 'type' child
-            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(TYPE, name));
+            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(SERVER, name));
             addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
             list.add(addTypeOperation);
         }
@@ -152,14 +148,14 @@ public class JsmPolicyExtension implements Extension {
             context.startSubsystemElement(JsmPolicyExtension.NAMESPACE, false);
             writer.writeStartElement("servers");
             ModelNode node = context.getModelNode();
-            ModelNode type = node.get(TYPE);
+            ModelNode type = node.get(SERVER);
             for (Property property : type.asPropertyList()) {
 
                 //write each child element to xml
                 writer.writeStartElement("server");
                 writer.writeAttribute("name", property.getName());
                 ModelNode entry = property.getValue();
-                TypeDefinition.POLICY.marshallAsAttribute(entry, true, writer);
+                ServerDefinition.POLICY.marshallAsAttribute(entry, true, writer);
                 writer.writeEndElement();
             }
             //End servers

@@ -8,8 +8,11 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REQ
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REQUIRED;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.TYPE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADDRESS;
-import static org.picketbox.jsmPolicy.subsystem.extension.TypeDefinition.POLICY;
+import static org.picketbox.jsmPolicy.subsystem.extension.ServerDefinition.POLICY;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,6 +25,7 @@ import org.jboss.as.controller.descriptions.DescriptionProvider;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
+import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
@@ -30,11 +34,11 @@ import org.jboss.msc.service.ServiceName;
  *
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  */
-class TypeAdd extends AbstractAddStepHandler {
+class ServerAdd extends AbstractAddStepHandler {
 
-    public static final TypeAdd INSTANCE = new TypeAdd();
+    public static final ServerAdd INSTANCE = new ServerAdd();
 
-    private TypeAdd() {
+    private ServerAdd() {
     }
 
    
@@ -48,8 +52,13 @@ class TypeAdd extends AbstractAddStepHandler {
             ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
         
-    	/*
     	String serverName = PathAddress.pathAddress(operation.get(ADDRESS)).getLastElement().getValue();
+    	
+    	System.err.println("ServerAdd.performRuntime("+serverName+","+model.get("policy").asString()+")");
+    	
+    	System.console().writer().println("\n\nServerAdd.performRuntime("+serverName+","+model.get("policy").asString()+")\n");
+    	    	
+    	/*
         String policy = POLICY.resolveModelAttribute(context,model).asString();
         
         JsmPolicyService service = new JsmPolicyService(serverName, policy);
