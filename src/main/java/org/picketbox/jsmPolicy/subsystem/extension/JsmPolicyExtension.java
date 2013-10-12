@@ -55,7 +55,7 @@ public class JsmPolicyExtension implements Extension {
     private static final String RESOURCE_NAME = JsmPolicyExtension.class.getPackage().getName() + ".LocalDescriptions";
 
     protected static final String TYPE = "type";
-    protected static final String TICK = "tick";
+    protected static final String POLICY = "policy";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
     protected static final PathElement TYPE_PATH = PathElement.pathElement(TYPE);
 
@@ -102,7 +102,7 @@ public class JsmPolicyExtension implements Extension {
 
             //Read the children
             while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
-                if (!reader.getLocalName().equals("deployment-types")) {
+                if (!reader.getLocalName().equals("servers")) {
                     throw ParseUtils.unexpectedElement(reader);
                 }
                 while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
@@ -114,31 +114,31 @@ public class JsmPolicyExtension implements Extension {
         }
 
         private void readDeploymentType(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
-            if (!reader.getLocalName().equals("deployment-type")) {
+            if (!reader.getLocalName().equals("server")) {
                 throw ParseUtils.unexpectedElement(reader);
             }
             ModelNode addTypeOperation = new ModelNode();
             addTypeOperation.get(OP).set(ModelDescriptionConstants.ADD);
 
-            String suffix = null;
+            String name = null;
             for (int i = 0; i < reader.getAttributeCount(); i++) {
                 String attr = reader.getAttributeLocalName(i);
                 String value = reader.getAttributeValue(i);
-                if (attr.equals("tick")) {
-                    TypeDefinition.TICK.parseAndSetParameter(value, addTypeOperation, reader);
-                } else if (attr.equals("suffix")) {
-                    suffix = value;
+                if (attr.equals("policy")) {
+                    TypeDefinition.POLICY.parseAndSetParameter(value, addTypeOperation, reader);
+                } else if (attr.equals("name")) {
+                    name = value;
                 } else {
                     throw ParseUtils.unexpectedAttribute(reader, i);
                 }
             }
             ParseUtils.requireNoContent(reader);
-            if (suffix == null) {
-                throw ParseUtils.missingRequiredElement(reader, Collections.singleton("suffix"));
+            if (name == null) {
+                throw ParseUtils.missingRequiredElement(reader, Collections.singleton("name"));
             }
 
             //Add the 'add' operation for each 'type' child
-            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(TYPE, suffix));
+            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(TYPE, name));
             addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
             list.add(addTypeOperation);
         }
@@ -150,19 +150,19 @@ public class JsmPolicyExtension implements Extension {
         public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context) throws XMLStreamException {
             //Write out the main subsystem element
             context.startSubsystemElement(JsmPolicyExtension.NAMESPACE, false);
-            writer.writeStartElement("deployment-types");
+            writer.writeStartElement("servers");
             ModelNode node = context.getModelNode();
             ModelNode type = node.get(TYPE);
             for (Property property : type.asPropertyList()) {
 
                 //write each child element to xml
-                writer.writeStartElement("deployment-type");
-                writer.writeAttribute("suffix", property.getName());
+                writer.writeStartElement("server");
+                writer.writeAttribute("name", property.getName());
                 ModelNode entry = property.getValue();
-                TypeDefinition.TICK.marshallAsAttribute(entry, true, writer);
+                TypeDefinition.POLICY.marshallAsAttribute(entry, true, writer);
                 writer.writeEndElement();
             }
-            //End deployment-types
+            //End servers
             writer.writeEndElement();
             //End subsystem
             writer.writeEndElement();

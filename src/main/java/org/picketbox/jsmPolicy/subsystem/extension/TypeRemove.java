@@ -28,9 +28,11 @@ class TypeRemove extends AbstractRemoveStepHandler{
 
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
-        String suffix = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        ServiceName name = JsmPolicyService.createServiceName(suffix);
+    	/*
+    	String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        ServiceName name = JsmPolicyService.createServiceName(serverName);
         context.removeService(name);
+        */
     }
 
 }

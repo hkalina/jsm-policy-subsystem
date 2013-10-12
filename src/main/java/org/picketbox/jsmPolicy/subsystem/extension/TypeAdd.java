@@ -8,7 +8,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REQ
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REQUIRED;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.TYPE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADDRESS;
-import static org.picketbox.jsmPolicy.subsystem.extension.TypeDefinition.TICK;
+import static org.picketbox.jsmPolicy.subsystem.extension.TypeDefinition.POLICY;
 
 import java.util.List;
 import java.util.Locale;
@@ -40,22 +40,26 @@ class TypeAdd extends AbstractAddStepHandler {
    
     @Override
     protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
-        TICK.validateAndSet(operation,model);
+        POLICY.validateAndSet(operation,model);
     }
 
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
             ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
-        String suffix = PathAddress.pathAddress(operation.get(ADDRESS)).getLastElement().getValue();
-        long tick = TICK.resolveModelAttribute(context,model).asLong();
-        JsmPolicyService service = new JsmPolicyService(suffix, tick);
-        ServiceName name = JsmPolicyService.createServiceName(suffix);
+        
+    	/*
+    	String serverName = PathAddress.pathAddress(operation.get(ADDRESS)).getLastElement().getValue();
+        String policy = POLICY.resolveModelAttribute(context,model).asString();
+        
+        JsmPolicyService service = new JsmPolicyService(serverName, policy);
+        ServiceName name = JsmPolicyService.createServiceName(serverName);
         ServiceController<JsmPolicyService> controller = context.getServiceTarget()
                 .addService(name, service)
                 .addListener(verificationHandler)
                 .setInitialMode(Mode.ACTIVE)
                 .install();
         newControllers.add(controller);
+        */
     }
 }

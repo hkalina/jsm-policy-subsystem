@@ -18,13 +18,13 @@ import static org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension.TYP
 public class TypeDefinition extends SimpleResourceDefinition {
     public static final TypeDefinition INSTANCE = new TypeDefinition();
 
-    protected static final SimpleAttributeDefinition TICK =
-            new SimpleAttributeDefinitionBuilder(JsmPolicyExtension.TICK, ModelType.LONG)
+    protected static final SimpleAttributeDefinition POLICY =
+            new SimpleAttributeDefinitionBuilder(JsmPolicyExtension.POLICY, ModelType.STRING)
                     .setAllowExpression(true)
-                    .setXmlName(JsmPolicyExtension.TICK)
+                    .setXmlName(JsmPolicyExtension.POLICY)
                     .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
-                    .setDefaultValue(new ModelNode(1000))
-                    .setAllowNull(false)
+                    .setDefaultValue(null)
+                    .setAllowNull(true)
                     .build();
 
 
@@ -39,6 +39,6 @@ public class TypeDefinition extends SimpleResourceDefinition {
 
     @Override
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(TICK, null, JsmPolicyTickHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(POLICY, null, JsmPolicyTickHandler.INSTANCE);
     }
 }

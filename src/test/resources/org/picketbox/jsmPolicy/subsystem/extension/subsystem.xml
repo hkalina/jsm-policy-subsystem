@@ -1,5 +1,5 @@
 <subsystem xmlns="urn:org.picketbox.jsmPolicy.subsystem:1.0">
-    <deployment-types>
-        <deployment-type suffix="tst" tick="12345"/>
-    </deployment-types>
+    <servers>
+        <server name="tst" policy="12345"/>
+    </servers>
 </subsystem>

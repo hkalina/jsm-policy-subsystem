@@ -44,9 +44,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Parse the subsystem xml into operations
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                        "   <deployment-types>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
-                        "   </deployment-types>" +
+                        "   <servers>" +
+                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "   </servers>" +
                         "</subsystem>";
         List<ModelNode> operations = super.parse(subsystemXml);
 
@@ -66,7 +66,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Then we will get the add type operation
         ModelNode addType = operations.get(1);
         Assert.assertEquals(ADD, addType.get(OP).asString());
-        Assert.assertEquals(12345, addType.get("tick").asLong());
+        Assert.assertEquals(12345, addType.get("policy").asLong());
         addr = PathAddress.pathAddress(addType.get(OP_ADDR));
         Assert.assertEquals(2, addr.size());
         element = addr.getElement(0);
@@ -85,9 +85,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Parse the subsystem xml and install into the controller
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                        "   <deployment-types>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
-                        "   </deployment-types>" +
+                        "   <servers>" +
+                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "   </servers>" +
                         "</subsystem>";
         KernelServices services = super.installInController(subsystemXml);
 
@@ -98,8 +98,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(JsmPolicyExtension.SUBSYSTEM_NAME));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("type"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type").hasDefined("tst"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("tick"));
-        Assert.assertEquals(12345, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst", "tick").asLong());
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("policy"));
+        Assert.assertEquals(12345, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst", "policy").asLong());
     }
 
     /**
@@ -111,9 +111,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Parse the subsystem xml and install into the first controller
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                        "   <deployment-types>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
-                        "   </deployment-types>" +
+                        "   <servers>" +
+                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "   </servers>" +
                         "</subsystem>";
         KernelServices servicesA = super.installInController(subsystemXml);
         //Get the model and the persisted xml from the first controller
@@ -165,9 +165,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Parse the subsystem xml and install into the first controller
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                        "   <deployment-types>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
-                        "   </deployment-types>" +
+                        "   <servers>" +
+                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "   </servers>" +
                         "</subsystem>";
         KernelServices services = super.installInController(subsystemXml);
 
@@ -189,9 +189,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     public void testExecuteOperations() throws Exception {
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                        "   <deployment-types>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
-                        "   </deployment-types>" +
+                        "   <servers>" +
+                        "       <server name=\"tst\" policy=\"12345\"/>" +
+                        "   </servers>" +
                         "</subsystem>";
         KernelServices services = super.installInController(subsystemXml);
 
@@ -202,7 +202,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
         addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        addOp.get("tick").set(1000);
+        addOp.get("policy").set(1000);
         ModelNode result = services.executeOperation(addOp);
         Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());
 
@@ -211,18 +211,18 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(JsmPolicyExtension.SUBSYSTEM_NAME));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("type"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type").hasDefined("tst"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("tick"));
-        Assert.assertEquals(12345, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst", "tick").asLong());
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("policy"));
+        Assert.assertEquals(12345, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst", "policy").asLong());
 
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type").hasDefined("foo"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "foo").hasDefined("tick"));
-        Assert.assertEquals(1000, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "foo", "tick").asLong());
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "foo").hasDefined("policy"));
+        Assert.assertEquals(1000, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "foo", "policy").asLong());
 
         //Call write-attribute
         ModelNode writeOp = new ModelNode();
         writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
         writeOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        writeOp.get(NAME).set("tick");
+        writeOp.get(NAME).set("policy");
         writeOp.get(VALUE).set(3456);
         result = services.executeOperation(writeOp);
         Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());
@@ -231,7 +231,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         ModelNode readOp = new ModelNode();
         readOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
         readOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        readOp.get(NAME).set("tick");
+        readOp.get(NAME).set("policy");
         result = services.executeOperation(readOp);
         Assert.assertEquals(3456, checkResultAndGetContents(result).asLong());
 

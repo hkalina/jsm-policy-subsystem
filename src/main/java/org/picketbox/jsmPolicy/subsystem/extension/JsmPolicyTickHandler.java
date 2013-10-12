@@ -15,7 +15,7 @@ class JsmPolicyTickHandler extends AbstractWriteAttributeHandler<Void> {
     public static final JsmPolicyTickHandler INSTANCE = new JsmPolicyTickHandler();
 
     private JsmPolicyTickHandler() {
-        super(TypeDefinition.TICK);
+        super(TypeDefinition.POLICY);
     }
 
 
@@ -36,13 +36,14 @@ class JsmPolicyTickHandler extends AbstractWriteAttributeHandler<Void> {
 
     protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
                                            ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
-        if (attributeName.equals(JsmPolicyExtension.TICK)) {
-            final String suffix = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-            JsmPolicyService service = (JsmPolicyService) context.getServiceRegistry(true).getRequiredService(JsmPolicyService.createServiceName(suffix)).getValue();
+        /*
+    	if (attributeName.equals(JsmPolicyExtension.POLICY)) {
+            final String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+            JsmPolicyService service = (JsmPolicyService) context.getServiceRegistry(true).getRequiredService(JsmPolicyService.createServiceName(name)).getValue();
             service.setTick(resolvedValue.asLong());
             context.completeStep();
         }
-
+        */
         return false;
     }
 

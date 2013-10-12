@@ -12,7 +12,7 @@ import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceRegistry;
 import org.jboss.vfs.VirtualFile;
-import org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyService;
+//import org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyService;
 
 /**
  * An example deployment unit processor that does nothing. To add more deployment
@@ -39,7 +39,8 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
 
     @Override
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
-        String name = phaseContext.getDeploymentUnit().getName();
+        /*
+    	String name = phaseContext.getDeploymentUnit().getName();
         ResourceRoot root = phaseContext.getDeploymentUnit().getAttachment(Attachments.DEPLOYMENT_ROOT);
         JsmPolicyService service = getTrackerService(phaseContext.getServiceRegistry(), name);
         if (service != null) {
@@ -49,26 +50,30 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
                 service.addCoolDeployment(name);
             }
         }
+        */
     }
 
     @Override
     public void undeploy(DeploymentUnit context) {
-        context.getServiceRegistry();
+        /*
+    	context.getServiceRegistry();
         String name = context.getName();
         JsmPolicyService service = getTrackerService(context.getServiceRegistry(), name);
         if (service != null) {
             service.removeDeployment(name);
         }
+        */
     }
-
+    /*
     private JsmPolicyService getTrackerService(ServiceRegistry registry, String name) {
-        int last = name.lastIndexOf(".");
-        String suffix = name.substring(last + 1);
-        ServiceController<?> container = registry.getService(JsmPolicyService.createServiceName(suffix));
+    	int last = name.lastIndexOf(".");
+        String name = name.substring(last + 1);
+        ServiceController<?> container = registry.getService(JsmPolicyService.createServiceName(name));
         if (container != null) {
             JsmPolicyService service = (JsmPolicyService)container.getValue();
             return service;
         }
         return null;
     }
+    */
 }
