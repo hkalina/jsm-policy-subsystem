@@ -39,11 +39,12 @@ class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
                                            ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
     	
     	if (attributeName.equals(JsmPolicyExtension.POLICY)) {
-            final String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
             
-            System.err.println("JsmPolicyAttributeHandler.applyUpdateToRuntime(policy: "+currentValue.asString()+">"+resolvedValue.asString()+")");
+    		final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
             
-            PolicyManager.INSTANCE.setPolicy(resolvedValue.asString()); // TODO only for current server
+            PolicyManager.INSTANCE.setPolicy(serverName, resolvedValue.asString());
+            
+            System.err.println("JsmPolicyAttributeHandler.applyUpdateToRuntime(policy: "+currentValue.asString()+">"+resolvedValue.asString()+" ["+serverName+"])");
             
             //JsmPolicyService service = (JsmPolicyService) context.getServiceRegistry(true).getRequiredService(JsmPolicyService.createServiceName(name)).getValue();
             //service.setTick(resolvedValue.asLong());

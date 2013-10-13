@@ -1,5 +1,6 @@
 package org.picketbox.jsmPolicy.subsystem.extension;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADDRESS;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIPTION;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OPERATION_NAME;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REMOVE;
@@ -29,9 +30,13 @@ class ServerRemove extends AbstractRemoveStepHandler{
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
     	
-    	System.err.println("ServerRemove!");
-    	/*
     	String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+    	
+    	PolicyManager.INSTANCE.setPolicy(serverName, null);
+    	
+    	System.err.println("ServerRemove.performRuntime("+serverName+")");
+    	
+    	/*
         ServiceName name = JsmPolicyService.createServiceName(serverName);
         context.removeService(name);
         */

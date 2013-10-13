@@ -54,9 +54,9 @@ class ServerAdd extends AbstractAddStepHandler {
         
     	String serverName = PathAddress.pathAddress(operation.get(ADDRESS)).getLastElement().getValue();
     	
-    	System.err.println("ServerAdd.performRuntime("+serverName+","+model.get("policy").asString()+")");
+    	PolicyManager.INSTANCE.setPolicy(serverName, model.get("policy").asString());
     	
-    	PolicyManager.INSTANCE.setPolicy(model.get("policy").asString()); // TODO only for current server
+    	System.err.println("ServerAdd.performRuntime("+serverName+","+model.get("policy").asString()+")");
     	
     	/*
         String policy = POLICY.resolveModelAttribute(context,model).asString();
