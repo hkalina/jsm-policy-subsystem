@@ -9,7 +9,7 @@ This is Java Security Manager Policy subsystem for JBoss/Wildfly. It consist of 
 
 
 ## Installation of jsm-policy-subsystem ##
-1. Do compilation: `mvn -Dmaven.test.skip=true clean install`
+1. Do compilation: `mvn clean install`
 2. Copy target to your server: `cp -r target/module/* $(JBOSS_PATH)/modules/system/layers/base/`
 3. Add following into your **standalone.conf** or **domain.conf**:
   ```
