@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.extension;
+package org.picketbox.jsmpolicy.subsystem.extension;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADDRESS;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIPTION;

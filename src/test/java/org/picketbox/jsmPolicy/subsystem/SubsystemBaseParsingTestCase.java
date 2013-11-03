@@ -2,7 +2,7 @@ package org.picketbox.jsmPolicy.subsystem;
 
 
 import org.jboss.as.subsystem.test.AbstractSubsystemBaseTest;
-import org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension;
+import org.picketbox.jsmpolicy.subsystem.extension.JsmPolicyExtension;
 
 import java.io.IOException;
 

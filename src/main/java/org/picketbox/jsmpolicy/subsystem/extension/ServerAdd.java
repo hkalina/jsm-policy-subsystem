@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.extension;
+package org.picketbox.jsmpolicy.subsystem.extension;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DEFAULT;
@@ -8,7 +8,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REQ
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REQUIRED;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.TYPE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADDRESS;
-import static org.picketbox.jsmPolicy.subsystem.extension.ServerDefinition.POLICY;
+import static org.picketbox.jsmpolicy.subsystem.extension.ServerDefinition.POLICY;
 
 import java.io.FileWriter;
 import java.io.IOException;

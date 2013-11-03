@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.extension;
+package org.picketbox.jsmpolicy.subsystem.extension;
 
 import java.io.File;
 import java.security.Policy;
@@ -9,7 +9,7 @@ public class PolicyManager {
 	
 	public static final PolicyManager INSTANCE = new PolicyManager();
 	
-	private static final Logger log = Logger.getLogger("org.picketbox.jsmPolicy");
+	private static final Logger log = Logger.getLogger(PolicyManager.class);
 	
 	private PolicyManager(){}
 	

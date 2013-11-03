@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.extension;
+package org.picketbox.jsmpolicy.subsystem.extension;
 
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
@@ -9,8 +9,8 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 
-import static org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension.SERVER;
-import static org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension.SERVER_PATH;
+import static org.picketbox.jsmpolicy.subsystem.extension.JsmPolicyExtension.SERVER;
+import static org.picketbox.jsmpolicy.subsystem.extension.JsmPolicyExtension.SERVER_PATH;
 
 /**
  * @author <a href="tcerar@redhat.com">Tomaz Cerar</a>

@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.extension;
+package org.picketbox.jsmpolicy.subsystem.extension;
 
 import org.jboss.as.controller.Extension;
 import org.jboss.as.controller.ExtensionContext;
@@ -37,12 +37,12 @@ public class JsmPolicyExtension implements Extension {
     /**
      * The name space used for the {@code subsystem} element
      */
-    public static final String NAMESPACE = "urn:org.picketbox.jsmPolicy:1.0";
+    public static final String NAMESPACE = "urn:org.picketbox.jsmpolicy:1.0";
 
     /**
      * The name of our subsystem within the model.
      */
-    public static final String SUBSYSTEM_NAME = "jsmPolicy";
+    public static final String SUBSYSTEM_NAME = "jsmpolicy";
 
     /**
      * The parser used for parsing our subsystem

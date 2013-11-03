@@ -17,13 +17,13 @@ This is Java Security Manager Policy subsystem for JBoss/Wildfly. It consist of 
   <server xmlns="urn:jboss:domain:1.4">
       <extensions>
           ...
-          <extension module="org.picketbox.jsmPolicy.subsystem"/>
+          <extension module="org.picketbox.jsmpolicy.subsystem"/>
           ...
       </extensions>
       
       <profile>
           ...
-          <subsystem xmlns="urn:org.picketbox.jsmPolicy:1.0"></subsystem>
+          <subsystem xmlns="urn:org.picketbox.jsmpolicy:1.0"></subsystem>
           ...
       </profile>
   </server>

@@ -25,7 +25,7 @@
         <extension module="org.jboss.as.web"/>
         <extension module="org.jboss.as.webservices"/>
         <extension module="org.jboss.as.weld"/>
-        <extension module="org.picketbox.jsmPolicy.subsystem"/>
+        <extension module="org.picketbox.jsmpolicy.subsystem"/>
     </extensions>
 
 
@@ -58,7 +58,7 @@
     </management>
 
     <profile>
-        <subsystem xmlns="urn:org.picketbox.jsmPolicy:1.0">
+        <subsystem xmlns="urn:org.picketbox.jsmpolicy:1.0">
             <servers>
                 <server name="jknotebook" policy="/home/honza/Wildfly/5rijen/jsm-policy-subsystem/src/test/resources/povolitVse.policy"/>
             </servers>

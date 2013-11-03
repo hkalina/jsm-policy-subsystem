@@ -27,8 +27,8 @@
         <artifactId>jboss-as-parent</artifactId>
     </parent -->
 
-    <groupId>org.picketbox.jsmPolicy</groupId>
-    <artifactId>jsmPolicy-subsystem</artifactId>
+    <groupId>org.picketbox.jsmpolicy</groupId>
+    <artifactId>jsmpolicy-subsystem</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <name>JBoss Application Server: Subsystem Artifact</name>
@@ -38,7 +38,7 @@
     <properties>
         <version.jboss.as>7.1.1.Final</version.jboss.as>
         <version.junit>4.8.2</version.junit>
-        <module.name>org.picketbox.jsmPolicy.subsystem</module.name>
+        <module.name>org.picketbox.jsmpolicy.subsystem</module.name>
     </properties>
     
 

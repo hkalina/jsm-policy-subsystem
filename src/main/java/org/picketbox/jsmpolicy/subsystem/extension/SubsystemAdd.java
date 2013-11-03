@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.extension;
+package org.picketbox.jsmpolicy.subsystem.extension;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import org.jboss.as.server.DeploymentProcessorTarget;
 import org.jboss.dmr.ModelNode;
 import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
-import org.picketbox.jsmPolicy.subsystem.deployment.SubsystemDeploymentProcessor;
+import org.picketbox.jsmpolicy.subsystem.deployment.SubsystemDeploymentProcessor;
 
 /**
  * Handler responsible for adding the subsystem resource to the model

@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.extension;
+package org.picketbox.jsmpolicy.subsystem.extension;
 
 import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.logging.Logger;

@@ -9,7 +9,8 @@ import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.KernelServices;
 import org.jboss.dmr.ModelNode;
 import org.junit.Test;
-import org.picketbox.jsmPolicy.subsystem.extension.JsmPolicyExtension;
+import org.picketbox.jsmpolicy.subsystem.extension.JsmPolicyExtension;
+
 import java.util.List;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;

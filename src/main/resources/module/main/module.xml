@@ -1,6 +1,6 @@
-<module xmlns="urn:jboss:module:1.0" name="org.picketbox.jsmPolicy.subsystem">
+<module xmlns="urn:jboss:module:1.0" name="org.picketbox.jsmpolicy.subsystem">
     <resources>
-        <resource-root path="jsmPolicy-subsystem.jar"/>
+        <resource-root path="jsmpolicy-subsystem.jar"/>
     </resources>
     
     <dependencies>

@@ -1,4 +1,4 @@
-package org.picketbox.jsmPolicy.subsystem.deployment;
+package org.picketbox.jsmpolicy.subsystem.deployment;
 
 import org.jboss.as.server.AbstractDeploymentChainStep;
 import org.jboss.as.server.deployment.Attachments;
