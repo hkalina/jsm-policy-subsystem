@@ -39,7 +39,7 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
     @Override
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         
-    	System.err.println("deploy()");
+    	//System.err.println("deploy()");
     	/*
     	String name = phaseContext.getDeploymentUnit().getName();
         ResourceRoot root = phaseContext.getDeploymentUnit().getAttachment(Attachments.DEPLOYMENT_ROOT);
@@ -57,7 +57,7 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
     @Override
     public void undeploy(DeploymentUnit context) {
         
-    	System.err.println("undeploy()");
+    	//System.err.println("undeploy()");
     	/*
     	context.getServiceRegistry();
         String name = context.getName();

@@ -1,10 +1,15 @@
 package org.picketbox.jsmPolicy.subsystem.extension;
 
+import java.io.File;
 import java.security.Policy;
+
+import org.jboss.logging.Logger;
 
 public class PolicyManager {
 	
 	public static final PolicyManager INSTANCE = new PolicyManager();
+	
+	private static final Logger log = Logger.getLogger("org.picketbox.jsmPolicy");
 	
 	private PolicyManager(){}
 	
@@ -16,17 +21,38 @@ public class PolicyManager {
 		
 		if(policy==null || policy.equals("undefined")){ // disable JSM
 			
-			System.err.println("PolicyManager.unsetPolicy");
+			log.info("JsmPolicy: unsetting policy");
 			
 			System.setSecurityManager(null);
 			
 		}else{ // enable JSM with specified policy file
 			
-			System.err.println("PolicyManager.setPolicy("+policy+")");
-			
-			System.setProperty("java.security.policy", policy);
-			Policy.getPolicy().refresh();
-			System.setSecurityManager(new SecurityManager());
+			try{
+			    
+			    if(!new File(policy).isFile()){
+			    	log.error("JsmPolicy: policy file \""+policy+"\" is not file!");
+			    	return; // Exception?
+			    }
+			    
+			    log.info("JsmPolicy: setting policy \""+policy+"\"");
+			    
+				System.setProperty("java.security.policy", policy);
+				
+				//if(Policy.getPolicy() instanceof org.jboss.security.jacc.DelegatingPolicy){
+				//	((org.jboss.security.jacc.DelegatingPolicy)Policy.getPolicy()).getPolicyProxy().refresh();
+				//}else{
+					Policy.getPolicy().refresh();
+				//}
+			    
+			    if(System.getSecurityManager()==null){
+			        System.setSecurityManager(new SecurityManager());
+			    }
+			    
+			    log.info("JsmPolicy: policy set successfuly");
+			    
+			}catch(Exception e){
+				log.error("JsmPolicy: setting policy failed: "+e.toString());
+			}
 			
 		}
 		
@@ -40,10 +66,10 @@ public class PolicyManager {
 	public void setPolicy(String server, String policy){
 		
 		if(server.equals(System.getProperty("jboss.server.name"))){
-			System.err.println("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
+			//System.err.println("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
 			setPolicy(policy);
 		}else{
-			System.err.println("PolicyManager.setPolicy("+server+"!="+System.getProperty("jboss.server.name")+","+policy+")");
+			//System.err.println("PolicyManager.setPolicy("+server+"!="+System.getProperty("jboss.server.name")+","+policy+")");
 		}
 		
 	}

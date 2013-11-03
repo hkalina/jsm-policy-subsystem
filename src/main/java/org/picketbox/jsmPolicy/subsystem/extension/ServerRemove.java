@@ -34,7 +34,7 @@ class ServerRemove extends AbstractRemoveStepHandler{
     	
     	PolicyManager.INSTANCE.setPolicy(serverName, null);
     	
-    	System.err.println("ServerRemove.performRuntime("+serverName+")");
+    	//System.err.println("ServerRemove.performRuntime("+serverName+")");
     	
     	/*
         ServiceName name = JsmPolicyService.createServiceName(serverName);

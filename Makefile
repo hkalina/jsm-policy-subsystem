@@ -1,5 +1,5 @@
 # Path to JBoss AS / EAP / Wildfly
-JBOSS_PATH = ../wildfly-target
+JBOSS_PATH = ../jboss-eap-6.1
 
 all: run
 
