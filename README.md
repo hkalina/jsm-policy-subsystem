@@ -7,6 +7,9 @@ This is Java Security Manager Policy subsystem for JBoss/Wildfly. It consist of 
 * [jsm-policy-console](https://github.com/honza889/jsm-policy-console) - frontend (extension of JBoss Management Console)
 * [jsm-policy-test](https://github.com/honza889/jsm-policy-test) - test of backend subsystem
 
+Current status:
+* Under JBoss EAP 6.1 with disabled JACC works good
+* Under Wildfly 8 Beta1 with JACC probably works, but SecurityManager and JACC itself cause problems
 
 ## Installation of jsm-policy-subsystem ##
 1. Do compilation: `mvn clean install`
