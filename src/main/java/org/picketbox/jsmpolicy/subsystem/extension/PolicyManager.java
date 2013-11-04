@@ -38,11 +38,12 @@ public class PolicyManager {
 			    
 				System.setProperty("java.security.policy", policy);
 				
-				//if(Policy.getPolicy() instanceof org.jboss.security.jacc.DelegatingPolicy){
-				//	((org.jboss.security.jacc.DelegatingPolicy)Policy.getPolicy()).getPolicyProxy().refresh();
-				//}else{
+				if(Policy.getPolicy() instanceof org.jboss.security.jacc.DelegatingPolicy){
+					log.info("JsmPolicy: JACC DelegatingPolicy is used");
+					((org.jboss.security.jacc.DelegatingPolicy)Policy.getPolicy()).getPolicyProxy().refresh();
+				}else{
 					Policy.getPolicy().refresh();
-				//}
+				}
 			    
 			    if(System.getSecurityManager()==null){
 			        System.setSecurityManager(new SecurityManager());
