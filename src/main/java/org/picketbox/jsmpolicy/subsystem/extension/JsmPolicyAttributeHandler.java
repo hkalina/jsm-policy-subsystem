@@ -19,7 +19,6 @@ class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
         super(ServerDefinition.POLICY);
     }
 
-
     /**
      * Hook to allow subclasses to make runtime changes to effect the attribute value change.
      *
@@ -39,16 +38,8 @@ class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
                                            ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
     	
     	if (attributeName.equals(JsmPolicyExtension.POLICY)) {
-            
     		final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-            
-            PolicyManager.INSTANCE.setPolicy(serverName, resolvedValue.asString());
-            
-            //System.err.println("JsmPolicyAttributeHandler.applyUpdateToRuntime(policy: "+currentValue.asString()+">"+resolvedValue.asString()+" ["+serverName+"])");
-            
-            //JsmPolicyService service = (JsmPolicyService) context.getServiceRegistry(true).getRequiredService(JsmPolicyService.createServiceName(name)).getValue();
-            //service.setTick(resolvedValue.asLong());
-            //context.completeStep();
+            PolicyManager.INSTANCE.setServerPolicy(serverName, resolvedValue.asString());
         }
         
         return false;
@@ -68,6 +59,11 @@ class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
      */
     protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
                                          ModelNode valueToRestore, ModelNode valueToRevert, Void handback) {
-        // no-op
+        
+        if (attributeName.equals(JsmPolicyExtension.POLICY)) {
+    		final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+            PolicyManager.INSTANCE.setServerPolicy(serverName, valueToRevert.asString()); // TODO: check!
+        }
+        
     }
 }

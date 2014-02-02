@@ -64,13 +64,15 @@ public class PolicyManager {
 	 * @param server server name
 	 * @param policy URL of policy file (null or "undefined" means disable JSM)
 	 */
-	public void setPolicy(String server, String policy){
+	public void setServerPolicy(String server, String policy){
 		
 		if(server.equals(System.getProperty("jboss.server.name"))){
-			//System.err.println("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
+			log.info("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
+			System.err.println("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
 			setPolicy(policy);
 		}else{
-			//System.err.println("PolicyManager.setPolicy("+server+"!="+System.getProperty("jboss.server.name")+","+policy+")");
+			log.info("PolicyManager.setPolicy("+server+"!="+System.getProperty("jboss.server.name")+","+policy+")");
+			System.err.println("PolicyManager.setPolicy("+server+"!="+System.getProperty("jboss.server.name")+","+policy+")");
 		}
 		
 	}

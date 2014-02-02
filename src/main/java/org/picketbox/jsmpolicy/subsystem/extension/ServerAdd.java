@@ -38,10 +38,8 @@ class ServerAdd extends AbstractAddStepHandler {
 
     public static final ServerAdd INSTANCE = new ServerAdd();
 
-    private ServerAdd() {
-    }
+    private ServerAdd() {}
 
-   
     @Override
     protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
         POLICY.validateAndSet(operation,model);
@@ -53,22 +51,7 @@ class ServerAdd extends AbstractAddStepHandler {
             throws OperationFailedException {
         
     	String serverName = PathAddress.pathAddress(operation.get(ADDRESS)).getLastElement().getValue();
+    	PolicyManager.INSTANCE.setServerPolicy(serverName, model.get("policy").asString());
     	
-    	PolicyManager.INSTANCE.setPolicy(serverName, model.get("policy").asString());
-    	
-    	//System.err.println("ServerAdd.performRuntime("+serverName+","+model.get("policy").asString()+")");
-    	
-    	/*
-        String policy = POLICY.resolveModelAttribute(context,model).asString();
-        
-        JsmPolicyService service = new JsmPolicyService(serverName, policy);
-        ServiceName name = JsmPolicyService.createServiceName(serverName);
-        ServiceController<JsmPolicyService> controller = context.getServiceTarget()
-                .addService(name, service)
-                .addListener(verificationHandler)
-                .setInitialMode(Mode.ACTIVE)
-                .install();
-        newControllers.add(controller);
-        */
     }
 }

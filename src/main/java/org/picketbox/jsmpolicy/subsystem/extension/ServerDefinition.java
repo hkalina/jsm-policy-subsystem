@@ -31,9 +31,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
     private ServerDefinition() {
         super(SERVER_PATH,
                 JsmPolicyExtension.getResourceDescriptionResolver(SERVER),
-                //We always need to add an 'add' operation
                 ServerAdd.INSTANCE,
-                //Every resource that is added, normally needs a remove operation
                 ServerRemove.INSTANCE);
     }
 

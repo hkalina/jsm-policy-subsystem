@@ -31,15 +31,7 @@ class ServerRemove extends AbstractRemoveStepHandler{
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
     	
     	String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+    	PolicyManager.INSTANCE.setServerPolicy(serverName, null);
     	
-    	PolicyManager.INSTANCE.setPolicy(serverName, null);
-    	
-    	//System.err.println("ServerRemove.performRuntime("+serverName+")");
-    	
-    	/*
-        ServiceName name = JsmPolicyService.createServiceName(serverName);
-        context.removeService(name);
-        */
     }
-
 }
