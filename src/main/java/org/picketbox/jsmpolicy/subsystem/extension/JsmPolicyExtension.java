@@ -70,12 +70,9 @@ public class JsmPolicyExtension implements Extension {
     public void initialize(ExtensionContext context) {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
         final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(JsmPolicySubsystemDefinition.INSTANCE);
-
-        //Add the type child
         registration.registerSubModel(ServerDefinition.INSTANCE);
         subsystem.registerXMLElementWriter(parser);
     }
-
 
     /**
      * The subsystem parser, which uses stax to read and write to and from xml

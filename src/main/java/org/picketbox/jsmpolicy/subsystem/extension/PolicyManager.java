@@ -2,7 +2,6 @@ package org.picketbox.jsmpolicy.subsystem.extension;
 
 import java.io.File;
 import java.security.Policy;
-
 import org.jboss.logging.Logger;
 
 public class PolicyManager {
@@ -14,7 +13,7 @@ public class PolicyManager {
 	private PolicyManager(){}
 	
 	/**
-	 * Set policy used on this JVM
+	 * Set policy file used on this JVM
 	 * @param policy URL of policy file (null or "undefined" means disable JSM)
 	 */
 	public void setPolicy(String policy){
@@ -28,35 +27,41 @@ public class PolicyManager {
 		}else{ // enable JSM with specified policy file
 			
 			try{
-			    
-			    if(!new File(policy).isFile()){
-			    	log.error("JsmPolicy: policy file \""+policy+"\" is not file!");
-			    	return; // Exception?
-			    }
-			    
-			    log.info("JsmPolicy: setting policy \""+policy+"\"");
-			    
+				
+				if(!new File(policy).canRead()){
+					log.error("JsmPolicy: policy file \""+policy+"\" cannot be readed!");
+					return; // Exception?
+				}
+				
+				log.info("JsmPolicy: setting policy \""+policy+"\"");
+				
 				System.setProperty("java.security.policy", policy);
 				
-				if(Policy.getPolicy() instanceof org.jboss.security.jacc.DelegatingPolicy){
-					log.info("JsmPolicy: JACC DelegatingPolicy is used");
-					((org.jboss.security.jacc.DelegatingPolicy)Policy.getPolicy()).getPolicyProxy().refresh();
-				}else{
-					Policy.getPolicy().refresh();
-				}
-			    
-			    if(System.getSecurityManager()==null){
-			        System.setSecurityManager(new SecurityManager());
-			    }
-			    
-			    log.info("JsmPolicy: policy set successfuly");
-			    
+				refreshPolicy();
+				
+				System.setSecurityManager(new SecurityManager());
+				
+				log.info("JsmPolicy: policy set successfuly");
+				
 			}catch(Exception e){
 				log.error("JsmPolicy: setting policy failed: "+e.toString());
 			}
 			
 		}
 		
+	}
+	
+	public void refreshPolicy(){
+		try{
+			Class.forName("org.jboss.security.jacc.DelegatingPolicy"); // catch not existing JACC
+			if(Policy.getPolicy() instanceof org.jboss.security.jacc.DelegatingPolicy){
+				((org.jboss.security.jacc.DelegatingPolicy)Policy.getPolicy()).getPolicyProxy().refresh();
+				return;
+			}
+		}
+		catch(ClassNotFoundException e){}
+		
+		Policy.getPolicy().refresh(); // non-JACC policy
 	}
 	
 	/**
