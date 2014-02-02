@@ -13,7 +13,7 @@
         <module name="org.jboss.logging"/>
         <module name="org.jboss.vfs"/>
         
-        <!-- kvuli org.jboss.security.jacc.DelegatingPolicy -->
+        <!-- org.jboss.security.jacc.DelegatingPolicy -->
         <module name="org.picketbox" optional="true"/>
         
     </dependencies>

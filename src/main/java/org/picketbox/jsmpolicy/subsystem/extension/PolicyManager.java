@@ -56,12 +56,14 @@ public class PolicyManager {
 			Class.forName("org.jboss.security.jacc.DelegatingPolicy"); // catch not existing JACC
 			if(Policy.getPolicy() instanceof org.jboss.security.jacc.DelegatingPolicy){
 				((org.jboss.security.jacc.DelegatingPolicy)Policy.getPolicy()).getPolicyProxy().refresh();
+				log.info("JsmPolicy: JACC refresh");
 				return;
 			}
 		}
 		catch(ClassNotFoundException e){}
 		
 		Policy.getPolicy().refresh(); // non-JACC policy
+		log.info("JsmPolicy: non-JACC refresh");
 	}
 	
 	/**
