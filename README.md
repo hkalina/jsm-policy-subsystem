@@ -11,6 +11,8 @@ Current status:
 * Under JBoss EAP 6.1 with disabled JACC works good
 * Under Wildfly 8 Beta1 with JACC probably works, but SecurityManager and JACC itself cause problems
 
+[Wildfly 8 documentation: Extending Wildfly 8](https://docs.jboss.org/author/display/WFLY8/Extending+WildFly+8)
+
 ## Installation of jsm-policy-subsystem ##
 1. Do compilation: `mvn clean install`
 2. Copy target to your server: `cp -r target/module/* $(JBOSS_PATH)/modules/system/layers/base/`

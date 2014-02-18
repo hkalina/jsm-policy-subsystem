@@ -6,19 +6,15 @@ import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
-import org.jboss.logging.Logger;
 
-/**
- * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
- */
 class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
-
+	
     public static final JsmPolicyAttributeHandler INSTANCE = new JsmPolicyAttributeHandler();
-
+    
     private JsmPolicyAttributeHandler() {
         super(ServerDefinition.POLICY);
     }
-
+    
     /**
      * Hook to allow subclasses to make runtime changes to effect the attribute value change.
      *
@@ -33,15 +29,12 @@ class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
      * @return {@code true} if the server requires restart to effect the attribute
      *         value change; {@code false} if not
      */
-
     protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
                                            ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
-    	
-    	if (attributeName.equals(JsmPolicyExtension.POLICY)) {
+    	if (attributeName.equals("policy")) {
     		final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
             PolicyManager.INSTANCE.setServerPolicy(serverName, resolvedValue.asString());
         }
-        
         return false;
     }
 
@@ -59,11 +52,9 @@ class JsmPolicyAttributeHandler extends AbstractWriteAttributeHandler<Void> {
      */
     protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
                                          ModelNode valueToRestore, ModelNode valueToRevert, Void handback) {
-        
-        if (attributeName.equals(JsmPolicyExtension.POLICY)) {
+        if (attributeName.equals("policy")) {
     		final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-            PolicyManager.INSTANCE.setServerPolicy(serverName, valueToRevert.asString()); // TODO: check!
+            PolicyManager.INSTANCE.setServerPolicy(serverName, valueToRevert.asString());
         }
-        
     }
 }

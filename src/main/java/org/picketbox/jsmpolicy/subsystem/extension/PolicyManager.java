@@ -14,11 +14,13 @@ public class PolicyManager {
 	
 	/**
 	 * Set policy file used on this JVM
-	 * @param policy URL of policy file (null or "undefined" means disable JSM)
+	 * @param policy URL of policy file (null means disable JSM)
 	 */
 	public void setPolicy(String policy){
 		
-		if(policy==null || policy.equals("undefined")){ // disable JSM
+		printStatus();
+		
+		if(policy==null){ // disable JSM
 			
 			log.info("JsmPolicy: unsetting policy");
 			
@@ -66,12 +68,20 @@ public class PolicyManager {
 		log.info("JsmPolicy: non-JACC refresh");
 	}
 	
+	public void printStatus(){
+		Policy p = Policy.getPolicy();
+		String name = p==null ? "null" : p.getClass().getName();
+		System.err.println("JsmPolicy: Policy="+name);
+	}
+	
 	/**
 	 * Set policy used on given server
 	 * @param server server name
 	 * @param policy URL of policy file (null or "undefined" means disable JSM)
 	 */
 	public void setServerPolicy(String server, String policy){
+		
+		if(policy!=null && policy.equals("undefined")) policy = null;
 		
 		if(server.equals(System.getProperty("jboss.server.name"))){
 			log.info("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
