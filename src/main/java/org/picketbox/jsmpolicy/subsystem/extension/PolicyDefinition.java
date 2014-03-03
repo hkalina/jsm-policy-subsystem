@@ -57,12 +57,13 @@ public class PolicyDefinition extends SimpleResourceDefinition {
         }
     }
 
-    static class PolicyRemove extends AbstractRemoveStepHandler{
+    static class PolicyRemove extends AbstractRemoveStepHandler {
         public static final PolicyRemove INSTANCE = new PolicyRemove();
 
         private PolicyRemove() {}
 
-        protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
+        protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
+                throws OperationFailedException {
         }
     }
 
@@ -75,12 +76,13 @@ public class PolicyDefinition extends SimpleResourceDefinition {
         }
 
         protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
-                                               ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
+                ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder)
+                throws OperationFailedException {
             return false;
         }
 
         protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
-                                             ModelNode valueToRestore, ModelNode valueToRevert, Void handback) {
+                ModelNode valueToRestore, ModelNode valueToRevert, Void handback) {
         }
     }
 }

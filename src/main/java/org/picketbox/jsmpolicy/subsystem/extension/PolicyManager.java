@@ -76,25 +76,4 @@ public class PolicyManager {
 		String name = p==null ? "null" : p.getClass().getName();
 		System.err.println("JsmPolicy: Policy="+name);
 	}
-
-	/**
-	 * Set policy used on given server
-	 * @param server server name
-	 * @param policy URL of policy file (null or "undefined" means disable JSM)
-	 */
-	public void setServerPolicy(String server, String policy){
-
-		if(policy!=null && policy.equals("undefined")) policy = null;
-
-		if(server.equals(System.getProperty("jboss.server.name"))){
-			log.info("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
-			System.err.println("setPolicy("+server+"=="+System.getProperty("jboss.server.name")+","+policy+")");
-			setPolicy(policy);
-		}else{
-			log.info("PolicyManager.setPolicy("+server+"!="+System.getProperty("jboss.server.name")+","+policy+")");
-			System.err.println("PolicyManager.setPolicy("+server+"!="+System.getProperty("jboss.server.name")+","+policy+")");
-		}
-
-	}
-
 }
