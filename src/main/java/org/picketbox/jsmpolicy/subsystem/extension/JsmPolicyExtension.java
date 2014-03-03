@@ -1,5 +1,16 @@
 package org.picketbox.jsmpolicy.subsystem.extension;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
+
+import java.util.Collections;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+
 import org.jboss.as.controller.Extension;
 import org.jboss.as.controller.ExtensionContext;
 import org.jboss.as.controller.PathAddress;
@@ -18,74 +29,68 @@ import org.jboss.staxmapper.XMLElementWriter;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
 import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import java.util.Collections;
-import java.util.List;
-
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
-
 public class JsmPolicyExtension implements Extension {
-	
+
     public static final String NAMESPACE = "urn:org.picketbox.jsmpolicy:1.0";
     public static final String SUBSYSTEM_NAME = "jsmpolicy";
-    
+
     private final SubsystemParser parser = new SubsystemParser();
     private static final String RESOURCE_NAME = JsmPolicyExtension.class.getPackage().getName() + ".LocalDescriptions";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
     protected static final PathElement SERVER_PATH = PathElement.pathElement("server");
-    
+    protected static final PathElement POLICY_PATH = PathElement.pathElement("policy");
+
     static StandardResourceDescriptionResolver getResourceDescriptionResolver(final String keyPrefix) {
         String prefix = SUBSYSTEM_NAME + (keyPrefix == null ? "" : "." + keyPrefix);
         return new StandardResourceDescriptionResolver(prefix, RESOURCE_NAME, JsmPolicyExtension.class.getClassLoader(), true, false);
     }
-    
+
     public void initializeParsers(ExtensionParsingContext context) {
         context.setSubsystemXmlMapping(SUBSYSTEM_NAME, NAMESPACE, parser);
     }
-    
+
     public void initialize(ExtensionContext context) {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
-        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(JsmPolicySubsystemDefinition.INSTANCE);
+        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(SubsystemDefinition.INSTANCE);
         registration.registerSubModel(ServerDefinition.INSTANCE);
+        registration.registerSubModel(PolicyDefinition.INSTANCE);
         subsystem.registerXMLElementWriter(parser);
     }
-    
+
     private static class SubsystemParser implements XMLStreamConstants, XMLElementReader<List<ModelNode>>, XMLElementWriter<SubsystemMarshallingContext> {
-    	
+
         public void readElement(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
             ParseUtils.requireNoAttributes(reader);
-            
+
             final ModelNode subsystem = new ModelNode();
             subsystem.get(OP).set(ADD);
             subsystem.get(OP_ADDR).set(PathAddress.pathAddress(SUBSYSTEM_PATH).toModelNode());
             list.add(subsystem);
-            
-            // reading children of "subsystem" 
+
+            // reading children of "subsystem"
             while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
                 if (reader.getLocalName().equals("servers")) {
                 	// reading children of "servers"
                 	while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
                         if (reader.isStartElement()) {
-                            readServerElement(reader, list); // read "server"
+                            readServerElement(reader, list);
                         }
                     }
                 }else{
                 	throw ParseUtils.unexpectedElement(reader);
                 }
             }
+
+            loadPolicies(list);
         }
-        
+
         private void readServerElement(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
             if (!reader.getLocalName().equals("server")) {
                 throw ParseUtils.unexpectedElement(reader);
             }
             ModelNode addTypeOperation = new ModelNode();
             addTypeOperation.get(OP).set(ModelDescriptionConstants.ADD);
-            
+
             String serverName = null;
             for (int i = 0; i < reader.getAttributeCount(); i++) {
                 String name = reader.getAttributeLocalName(i);
@@ -102,13 +107,13 @@ public class JsmPolicyExtension implements Extension {
             if (serverName == null) {
                 throw ParseUtils.missingRequiredElement(reader, Collections.singleton("name"));
             }
-            
+
             // add the "add" operation for each "server"
             PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement("server", serverName));
             addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
             list.add(addTypeOperation);
         }
-        
+
         public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context) throws XMLStreamException {
             context.startSubsystemElement(JsmPolicyExtension.NAMESPACE, false); // goto subsystem
             writer.writeStartElement("servers"); // begin servers
@@ -123,6 +128,19 @@ public class JsmPolicyExtension implements Extension {
             }
             writer.writeEndElement(); // end servers
             writer.writeEndElement(); // end subsystem
+        }
+
+        private void loadPolicies(List<ModelNode> list) {
+
+            // TODO: create list from directory
+
+            ModelNode op = new ModelNode();
+            op.get(OP).set(ModelDescriptionConstants.ADD);
+            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement("policy", "fiktivni"));
+            op.get(OP_ADDR).set(addr.toModelNode());
+            op.get("file").set("f1");
+            list.add(op);
+
         }
     }
 }
