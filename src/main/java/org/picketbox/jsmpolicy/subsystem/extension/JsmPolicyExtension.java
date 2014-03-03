@@ -5,6 +5,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -130,17 +131,22 @@ public class JsmPolicyExtension implements Extension {
             writer.writeEndElement(); // end subsystem
         }
 
-        private void loadPolicies(List<ModelNode> list) {
+        void loadPolicies(List<ModelNode> list) {
 
-            // TODO: create list from directory
+            File directory = new File(System.getProperty("jboss.home.dir")+File.separator+"policies");
+            directory.mkdirs();
 
-            ModelNode op = new ModelNode();
-            op.get(OP).set(ModelDescriptionConstants.ADD);
-            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement("policy", "fiktivni"));
-            op.get(OP_ADDR).set(addr.toModelNode());
-            op.get("file").set("f1");
-            list.add(op);
+            for (File child : directory.listFiles()) {
 
+                ModelNode op = new ModelNode();
+                op.get(OP).set(ModelDescriptionConstants.ADD);
+                PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement("policy", child.getName()));
+                op.get(OP_ADDR).set(addr.toModelNode());
+                op.get("file").set(child.getAbsolutePath());
+                list.add(op);
+
+            }
         }
+
     }
 }

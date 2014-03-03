@@ -44,6 +44,7 @@ public class SubsystemDefinition extends SimpleResourceDefinition {
 	    public void performBoottime(OperationContext context, ModelNode operation, ModelNode model,
 	            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
 	            throws OperationFailedException {
+
 	    }
 	}
 
