@@ -70,9 +70,6 @@ public class JsmPolicyExtension implements Extension {
             subsystem.get(OP_ADDR).set(PathAddress.pathAddress(SUBSYSTEM_PATH).toModelNode());
             list.add(subsystem);
 
-            // reading directory of policies
-            //loadPolicies(list);
-
             // reading children of "subsystem"
             while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
                 if (reader.getLocalName().equals("servers")) {
@@ -149,7 +146,7 @@ public class JsmPolicyExtension implements Extension {
                 throw ParseUtils.missingRequiredElement(reader, Collections.singleton("name"));
             }
 
-            // add the "add" operation for each "server"
+            // add the "add" operation for each "policy"
             PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement("policy", serverName));
             addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
             list.add(addTypeOperation);
@@ -186,44 +183,5 @@ public class JsmPolicyExtension implements Extension {
             }
             writer.writeEndElement(); // end subsystem
         }
-
-        /*
-        void loadPolicies(List<ModelNode> list) {
-            // NOTE: this code is called only on Host controller
-
-            if (true) {
-                System.err.println(System.getProperties().toString());
-
-                System.err.println("POLICY:" + System.getProperty("jboss.server.name") + ":"
-                        + System.getProperty("jboss.home.dir"));
-
-                File directory = new File(System.getProperty("jboss.home.dir") + File.separator + "policies");
-                directory.mkdirs();
-
-                for (File child : directory.listFiles()) {
-                    try {
-                        byte[] bytes = Files.readAllBytes(Paths.get(child.getAbsolutePath()));
-
-                        ModelNode op = new ModelNode();
-                        op.get(OP).set(ModelDescriptionConstants.ADD);
-                        PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH,
-                                PathElement.pathElement("policy", child.getName()));
-                        op.get(OP_ADDR).set(addr.toModelNode());
-                        //op.get("file").set(child.getAbsolutePath());
-                        op.get("file").set(bytes.toString());
-
-                        list.add(op);
-                    }
-                    catch (IOException e) {
-                        log.warn("Policy file "+child.getAbsolutePath()+" cannot be loaded!");
-                    }
-                    catch (Exception e) {
-                        System.err.println("Policy file loading exc: "+e.getClass().getName());
-                    }
-                }
-            }
-        }
-        */
-
     }
 }

@@ -54,9 +54,9 @@ public class PolicyManager {
 	 */
 	public void setPolicy(String policy){
 
-	    System.err.println("setPolicy("+policy+")");
+        System.err.println("setPolicy("+policy+")");
 
-		printStatus();
+        printStatus();
 
 		if(policy==null){ // disable JSM
 
@@ -76,7 +76,7 @@ public class PolicyManager {
 
 				System.setProperty("java.security.policy", policy);
 
-				Policy.setPolicy(new JsmPolicy(Policy.getPolicy()));
+				//Policy.setPolicy(new JsmPolicy(Policy.getPolicy()));
 				Policy.getPolicy().refresh();
 
 				System.setSecurityManager(new SecurityManager());
