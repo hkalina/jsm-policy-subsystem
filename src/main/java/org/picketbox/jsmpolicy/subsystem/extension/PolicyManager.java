@@ -15,6 +15,16 @@ public class PolicyManager {
 
 	/**
 	 * Set policy file used on this JVM
+	 * @param fileContent Content of policy file to use
+	 */
+	public void setPolicyFile(String fileContent){
+
+	    System.err.println("setPolicyFile("+fileContent+")");
+
+	}
+
+	/**
+	 * Set policy file used on this JVM
 	 * @param policy URL of policy file (null means disable JSM)
 	 */
 	public void setPolicy(String policy){

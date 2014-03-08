@@ -24,14 +24,14 @@ public class JsmPolicy extends Policy {
     }
 
     public PermissionCollection getPermissions(ProtectionDomain domain){
-        System.err.println("JsmPolicy.getPermission");
+        //System.err.println("JsmPolicy.getPermission");
         final Permissions permissions = new Permissions();
         permissions.add(ALL_PERMISSION);
         return permissions;
     }
 
     public boolean implies(ProtectionDomain domain, Permission permission){
-        System.err.println("JsmPolicy.implies("+permission.toString()+")");
+        //System.err.println("JsmPolicy.implies("+permission.toString()+")");
         return true;
     }
 
