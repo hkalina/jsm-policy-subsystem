@@ -52,6 +52,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
         String newFileValue = resolvedValue.asString();
         String affectedPolicy = operation.get("address").get(1).get("policy").asString();
 
+        // TODO: optimalize
         ModelNode address = new ModelNode();
         address.add("subsystem", "jsmpolicy");
 
@@ -96,33 +97,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
                 throws OperationFailedException {
         }
     }
-/*
-    static class PolicyReadAttributeHandler implements OperationStepHandler {
 
-        public static final PolicyReadAttributeHandler INSTANCE = new PolicyReadAttributeHandler();
-
-        private PolicyReadAttributeHandler() {
-
-        }
-
-        public void execute(final OperationContext context, final ModelNode operation) throws OperationFailedException {
-
-            List<ModelNode> addressItems = operation.get("address").asList();
-            String policy = addressItems.get(addressItems.size()-1).get("policy").asString();
-
-            final ModelNode model = context.readResource(PathAddress.EMPTY_ADDRESS).getModel();
-            final ModelNode file = FILE.resolveModelAttribute(context, model);
-
-            System.out.println("READING("+policy+")");
-
-            if (file.isDefined()) {
-                context.getResult().set(  policy + ":" + System.getProperty("jboss.server.name", "?") );
-            }
-
-            context.completeStep(OperationContext.RollbackHandler.NOOP_ROLLBACK_HANDLER);
-        }
-    }
-*/
     static class PolicyWriteAttributeHandler extends AbstractWriteAttributeHandler<Void> {
 
         public static final PolicyWriteAttributeHandler INSTANCE = new PolicyWriteAttributeHandler();

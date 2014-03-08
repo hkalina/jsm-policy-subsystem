@@ -46,7 +46,7 @@ public class PolicyManager {
 
 	            setPolicy(temp.getAbsolutePath());
 
-	            //temp.delete();
+	            temp.delete();
             }
             catch(IOException e){
                 throw new OperationFailedException("setPolicyFile IOException: "+e.getLocalizedMessage());
