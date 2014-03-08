@@ -40,7 +40,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
     }
 
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(POLICY, null, ServerAttributeHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(POLICY, null, ServerWriteAttributeHandler.INSTANCE);
     }
 
     public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicyValue) throws OperationFailedException {
@@ -94,11 +94,11 @@ public class ServerDefinition extends SimpleResourceDefinition {
         }
     }
 
-    static class ServerAttributeHandler extends AbstractWriteAttributeHandler<Void> {
+    static class ServerWriteAttributeHandler extends AbstractWriteAttributeHandler<Void> {
 
-        public static final ServerAttributeHandler INSTANCE = new ServerAttributeHandler();
+        public static final ServerWriteAttributeHandler INSTANCE = new ServerWriteAttributeHandler();
 
-        private ServerAttributeHandler() {
+        private ServerWriteAttributeHandler() {
             super(ServerDefinition.POLICY);
         }
 

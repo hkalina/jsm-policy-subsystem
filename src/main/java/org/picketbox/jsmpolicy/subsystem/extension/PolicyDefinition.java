@@ -1,18 +1,22 @@
 package org.picketbox.jsmpolicy.subsystem.extension;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.as.controller.AbstractWriteAttributeHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.registry.AttributeAccess;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
+import org.jboss.as.controller.registry.Resource.ResourceEntry;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.msc.service.ServiceController;
@@ -39,6 +43,30 @@ public class PolicyDefinition extends SimpleResourceDefinition {
 
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
         resourceRegistration.registerReadWriteAttribute(FILE, null, PolicyWriteAttributeHandler.INSTANCE);
+    }
+
+    public static void refreshRelatedServers(OperationContext context){
+        System.err.println("refreshRelatedServers:");
+
+        ModelNode address = new ModelNode();
+        address.add("subsystem", "jsmpolicy");
+
+        Set<ResourceEntry> set = context.readResourceFromRoot(PathAddress.pathAddress(address),true).getChildren("server"); //.getModel();
+        Iterator<ResourceEntry> it = set.iterator();
+        while(it.hasNext()){
+            ResourceEntry entry = it.next();
+
+            System.out.println(entry.getName()+" - "+entry.getModel().get("policy").asString());
+
+
+
+            // TODO
+
+
+
+
+
+        }
     }
 
     static class PolicyAdd extends AbstractAddStepHandler {
@@ -104,7 +132,10 @@ public class PolicyDefinition extends SimpleResourceDefinition {
         protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
                 ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder)
                 throws OperationFailedException {
-            return false;
+
+            refreshRelatedServers(context);
+
+            return false; // restart not required
         }
 
         protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
