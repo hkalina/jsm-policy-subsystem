@@ -19,11 +19,14 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.as.controller.registry.Resource.ResourceEntry;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
+import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 
 public class PolicyDefinition extends SimpleResourceDefinition {
 
     public static final PolicyDefinition INSTANCE = new PolicyDefinition();
+
+    private static final Logger log = Logger.getLogger(PolicyDefinition.class);
 
     protected static final SimpleAttributeDefinition FILE =
             new SimpleAttributeDefinitionBuilder("file", ModelType.STRING)
@@ -45,27 +48,26 @@ public class PolicyDefinition extends SimpleResourceDefinition {
         resourceRegistration.registerReadWriteAttribute(FILE, null, PolicyWriteAttributeHandler.INSTANCE);
     }
 
-    public static void refreshRelatedServers(OperationContext context){
-        System.err.println("refreshRelatedServers:");
+    private static void refreshRelatedServers(OperationContext context, ModelNode operation, ModelNode resolvedValue) throws OperationFailedException{
+        String newFileValue = resolvedValue.asString();
+        String affectedPolicy = operation.get("address").get(1).get("policy").asString();
 
         ModelNode address = new ModelNode();
         address.add("subsystem", "jsmpolicy");
 
-        Set<ResourceEntry> set = context.readResourceFromRoot(PathAddress.pathAddress(address),true).getChildren("server"); //.getModel();
+        Set<ResourceEntry> set = context.readResourceFromRoot(PathAddress.pathAddress(address),true).getChildren("server");
         Iterator<ResourceEntry> it = set.iterator();
         while(it.hasNext()){
             ResourceEntry entry = it.next();
+            String server = entry.getName();
+            String policyOfServer = entry.getModel().get("policy").asString();
 
-            System.out.println(entry.getName()+" - "+entry.getModel().get("policy").asString());
-
-
-
-            // TODO
-
-
-
-
-
+            if(policyOfServer.equals(affectedPolicy)){
+                if(System.getProperty("jboss.server.name").equals(server)){
+                    log.info("Policy \""+policyOfServer+"\" used on server \""+server+"\" changed. Reloading...");
+                    PolicyManager.INSTANCE.setPolicyFile(newFileValue);
+                }
+            }
         }
     }
 
@@ -133,7 +135,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
                 ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder)
                 throws OperationFailedException {
 
-            refreshRelatedServers(context);
+            refreshRelatedServers(context, operation, resolvedValue);
 
             return false; // restart not required
         }
