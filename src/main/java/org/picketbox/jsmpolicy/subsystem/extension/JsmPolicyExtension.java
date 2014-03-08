@@ -5,7 +5,6 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,12 +24,15 @@ import org.jboss.as.controller.persistence.SubsystemMarshallingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
+import org.jboss.logging.Logger;
 import org.jboss.staxmapper.XMLElementReader;
 import org.jboss.staxmapper.XMLElementWriter;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
 import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
 public class JsmPolicyExtension implements Extension {
+
+    private static final Logger log = Logger.getLogger(JsmPolicyExtension.class);
 
     public static final String NAMESPACE = "urn:org.picketbox.jsmpolicy:1.0";
     public static final String SUBSYSTEM_NAME = "jsmpolicy";
@@ -68,6 +70,9 @@ public class JsmPolicyExtension implements Extension {
             subsystem.get(OP_ADDR).set(PathAddress.pathAddress(SUBSYSTEM_PATH).toModelNode());
             list.add(subsystem);
 
+            // reading directory of policies
+            //loadPolicies(list);
+
             // reading children of "subsystem"
             while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
                 if (reader.getLocalName().equals("servers")) {
@@ -77,12 +82,17 @@ public class JsmPolicyExtension implements Extension {
                             readServerElement(reader, list);
                         }
                     }
+                }else if (reader.getLocalName().equals("policies")) {
+                    // reading children of "policies"
+                    while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
+                        if (reader.isStartElement()) {
+                            readPolicyElement(reader, list);
+                        }
+                    }
                 }else{
                 	throw ParseUtils.unexpectedElement(reader);
                 }
             }
-
-            loadPolicies(list);
         }
 
         private void readServerElement(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
@@ -115,38 +125,105 @@ public class JsmPolicyExtension implements Extension {
             list.add(addTypeOperation);
         }
 
-        public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context) throws XMLStreamException {
-            context.startSubsystemElement(JsmPolicyExtension.NAMESPACE, false); // goto subsystem
-            writer.writeStartElement("servers"); // begin servers
-            ModelNode node = context.getModelNode();
-            ModelNode type = node.get("server");
-            for (Property property : type.asPropertyList()) {
-                writer.writeStartElement("server"); // begin server
-                writer.writeAttribute("name", property.getName());
-                ModelNode entry = property.getValue(); // get server ModelNode
-                ServerDefinition.POLICY.marshallAsAttribute(entry, true, writer); // attribute policy (entry=>writer)
-                writer.writeEndElement(); // end server
+        private void readPolicyElement(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
+            if (!reader.getLocalName().equals("policy")) {
+                throw ParseUtils.unexpectedElement(reader);
             }
-            writer.writeEndElement(); // end servers
+            ModelNode addTypeOperation = new ModelNode();
+            addTypeOperation.get(OP).set(ModelDescriptionConstants.ADD);
+
+            String serverName = null;
+            for (int i = 0; i < reader.getAttributeCount(); i++) {
+                String name = reader.getAttributeLocalName(i);
+                String value = reader.getAttributeValue(i);
+                if (name.equals("file")) {
+                    PolicyDefinition.FILE.parseAndSetParameter(value, addTypeOperation, reader);
+                } else if (name.equals("name")) {
+                    serverName = value;
+                } else {
+                    throw ParseUtils.unexpectedAttribute(reader, i);
+                }
+            }
+            ParseUtils.requireNoContent(reader);
+            if (serverName == null) {
+                throw ParseUtils.missingRequiredElement(reader, Collections.singleton("name"));
+            }
+
+            // add the "add" operation for each "server"
+            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement("policy", serverName));
+            addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
+            list.add(addTypeOperation);
+        }
+
+        public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context)
+                throws XMLStreamException {
+            context.startSubsystemElement(JsmPolicyExtension.NAMESPACE, false); // goto subsystem
+            {
+                writer.writeStartElement("servers"); // begin servers
+                ModelNode node = context.getModelNode();
+                ModelNode type = node.get("server");
+                for (Property property : type.asPropertyList()) {
+                    writer.writeStartElement("server"); // begin server
+                    writer.writeAttribute("name", property.getName());
+                    ModelNode entry = property.getValue(); // get server ModelNode
+                    ServerDefinition.POLICY.marshallAsAttribute(entry, true, writer); // attribute policy (entry=>writer)
+                    writer.writeEndElement(); // end server
+                }
+                writer.writeEndElement(); // end servers
+            }
+            {
+                writer.writeStartElement("policies"); // begin policies
+                ModelNode node = context.getModelNode();
+                ModelNode type = node.get("policy");
+                for (Property property : type.asPropertyList()) {
+                    writer.writeStartElement("policy"); // begin policy
+                    writer.writeAttribute("name", property.getName());
+                    ModelNode entry = property.getValue(); // get policy ModelNode
+                    PolicyDefinition.FILE.marshallAsAttribute(entry, true, writer); // attribute file (entry=>writer)
+                    writer.writeEndElement(); // end policy
+                }
+                writer.writeEndElement(); // end policies
+            }
             writer.writeEndElement(); // end subsystem
         }
 
+        /*
         void loadPolicies(List<ModelNode> list) {
+            // NOTE: this code is called only on Host controller
 
-            File directory = new File(System.getProperty("jboss.home.dir")+File.separator+"policies");
-            directory.mkdirs();
+            if (true) {
+                System.err.println(System.getProperties().toString());
 
-            for (File child : directory.listFiles()) {
+                System.err.println("POLICY:" + System.getProperty("jboss.server.name") + ":"
+                        + System.getProperty("jboss.home.dir"));
 
-                ModelNode op = new ModelNode();
-                op.get(OP).set(ModelDescriptionConstants.ADD);
-                PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement("policy", child.getName()));
-                op.get(OP_ADDR).set(addr.toModelNode());
-                op.get("file").set(child.getAbsolutePath());
-                list.add(op);
+                File directory = new File(System.getProperty("jboss.home.dir") + File.separator + "policies");
+                directory.mkdirs();
 
+                for (File child : directory.listFiles()) {
+                    try {
+                        byte[] bytes = Files.readAllBytes(Paths.get(child.getAbsolutePath()));
+
+                        ModelNode op = new ModelNode();
+                        op.get(OP).set(ModelDescriptionConstants.ADD);
+                        PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH,
+                                PathElement.pathElement("policy", child.getName()));
+                        op.get(OP_ADDR).set(addr.toModelNode());
+                        //op.get("file").set(child.getAbsolutePath());
+                        op.get("file").set(bytes.toString());
+
+                        list.add(op);
+                    }
+                    catch (IOException e) {
+                        log.warn("Policy file "+child.getAbsolutePath()+" cannot be loaded!");
+                    }
+                    catch (Exception e) {
+                        System.err.println("Policy file loading exc: "+e.getClass().getName());
+                    }
+                }
             }
         }
+        */
 
     }
 }

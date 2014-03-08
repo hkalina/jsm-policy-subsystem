@@ -7,8 +7,6 @@ import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.as.controller.AbstractWriteAttributeHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
-import org.jboss.as.controller.OperationStepHandler;
-import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
@@ -40,7 +38,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
     }
 
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(FILE, PolicyReadAttributeHandler.INSTANCE, PolicyWriteAttributeHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(FILE, null, PolicyWriteAttributeHandler.INSTANCE);
     }
 
     static class PolicyAdd extends AbstractAddStepHandler {
@@ -68,7 +66,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
                 throws OperationFailedException {
         }
     }
-
+/*
     static class PolicyReadAttributeHandler implements OperationStepHandler {
 
         public static final PolicyReadAttributeHandler INSTANCE = new PolicyReadAttributeHandler();
@@ -77,7 +75,6 @@ public class PolicyDefinition extends SimpleResourceDefinition {
 
         }
 
-        @Override
         public void execute(final OperationContext context, final ModelNode operation) throws OperationFailedException {
 
             List<ModelNode> addressItems = operation.get("address").asList();
@@ -95,7 +92,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
             context.completeStep(OperationContext.RollbackHandler.NOOP_ROLLBACK_HANDLER);
         }
     }
-
+*/
     static class PolicyWriteAttributeHandler extends AbstractWriteAttributeHandler<Void> {
 
         public static final PolicyWriteAttributeHandler INSTANCE = new PolicyWriteAttributeHandler();
@@ -114,4 +111,5 @@ public class PolicyDefinition extends SimpleResourceDefinition {
                 ModelNode valueToRestore, ModelNode valueToRevert, Void handback) {
         }
     }
+
 }

@@ -43,13 +43,24 @@ public class ServerDefinition extends SimpleResourceDefinition {
         resourceRegistration.registerReadWriteAttribute(POLICY, null, ServerAttributeHandler.INSTANCE);
     }
 
-    public static void useNewSettings(ModelNode operation, ModelNode newPolicyValue){
-        String requestServerName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        String requestPolicy = newPolicyValue==null ? null : newPolicyValue.asString();
-        if(requestPolicy!=null && requestPolicy.equals("undefined")) requestPolicy = null;
+    public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicyValue) throws OperationFailedException {
 
-        if(System.getProperty("jboss.server.name").equals(requestServerName)){
-            PolicyManager.INSTANCE.setPolicy(requestPolicy);
+        String changedServer = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        String policy = newPolicyValue==null ? null : newPolicyValue.asString();
+        if(policy!=null && policy.equals("undefined")) policy = null;
+
+        if(System.getProperty("jboss.server.name").equals(changedServer)){
+            String file = null;
+            if(policy!=null){
+                // getting policy file content
+                ModelNode address = new ModelNode();
+                address.add("subsystem", "jsmpolicy");
+                address.add("policy", policy);
+
+                ModelNode result = context.readResourceFromRoot(PathAddress.pathAddress(address)).getModel();
+                file = result.get("file").asString();
+            }
+            PolicyManager.INSTANCE.setPolicyFile(file);
         }
     }
 
@@ -67,7 +78,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
                 ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
                 throws OperationFailedException {
 
-            useNewSettings(operation, model.get("policy"));
+            useNewSettings(context, operation, model.get("policy"));
 
         }
     }
@@ -79,7 +90,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
         private ServerRemove() {}
 
         protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
-            useNewSettings(operation, null);
+            useNewSettings(context, operation, null);
         }
     }
 
@@ -93,7 +104,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
 
         protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
                                                ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
-            useNewSettings(operation, resolvedValue);
+            useNewSettings(context, operation, resolvedValue);
             return false; // restart not required
         }
 
@@ -101,10 +112,11 @@ public class ServerDefinition extends SimpleResourceDefinition {
          * Hook to allow subclasses to revert runtime changes
          * @param valueToRestore the previous value for the attribute, before this operation was executed
          * @param valueToRevert  the new value for the attribute that should be reverted
+         * @throws OperationFailedException
          */
         protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
-                                             ModelNode valueToRestore, ModelNode valueToRevert, Void handback) {
-            useNewSettings(operation, valueToRestore);
+                                             ModelNode valueToRestore, ModelNode valueToRevert, Void handback) throws OperationFailedException {
+            useNewSettings(context, operation, valueToRestore);
         }
     }
 }

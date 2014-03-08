@@ -1,10 +1,16 @@
 package org.picketbox.jsmpolicy.subsystem.extension;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.Policy;
 
+import org.jboss.as.controller.OperationFailedException;
 import org.jboss.logging.Logger;
 
+/**
+ * Work with security manager and security policy files
+ */
 public class PolicyManager {
 
 	public static final PolicyManager INSTANCE = new PolicyManager();
@@ -16,11 +22,30 @@ public class PolicyManager {
 	/**
 	 * Set policy file used on this JVM
 	 * @param fileContent Content of policy file to use
+	 * @throws IOException When creating of temporary file fails
 	 */
-	public void setPolicyFile(String fileContent){
+	public void setPolicyFile(String fileContent) throws OperationFailedException {
 
 	    System.err.println("setPolicyFile("+fileContent+")");
 
+	    if(fileContent==null){
+	        setPolicy(null);
+	    }else{
+	        try{
+	            File temp = File.createTempFile("jsm-",".policy");
+
+	            FileOutputStream out = new FileOutputStream(temp);
+	            out.write(fileContent.getBytes());
+	            out.close();
+
+	            setPolicy(temp.getAbsolutePath());
+
+	            //temp.delete();
+            }
+            catch(IOException e){
+                throw new OperationFailedException("setPolicyFile IOException: "+e.getLocalizedMessage());
+            }
+	    }
 	}
 
 	/**
@@ -28,6 +53,8 @@ public class PolicyManager {
 	 * @param policy URL of policy file (null means disable JSM)
 	 */
 	public void setPolicy(String policy){
+
+	    System.err.println("setPolicy("+policy+")");
 
 		printStatus();
 
