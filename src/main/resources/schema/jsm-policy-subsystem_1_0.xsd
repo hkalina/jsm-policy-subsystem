@@ -8,9 +8,10 @@
     <xs:element name="subsystem" type="subsystemType"/>
 
     <xs:complexType name="subsystemType">
-        <xs:choice minOccurs="0" maxOccurs="1">
+        <xs:all minOccurs="0" maxOccurs="1">
             <xs:element name="servers" type="serversType"/>
-        </xs:choice>
+            <xs:element name="policies" type="policiesType"/>
+        </xs:all>
     </xs:complexType>
 
     <xs:complexType name="serversType">
@@ -22,6 +23,17 @@
     <xs:complexType name="serverType">
         <xs:attribute name="name" use="required"/>
         <xs:attribute name="policy" use="optional"/>
+    </xs:complexType>
+    
+    <xs:complexType name="policiesType">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="policy" type="policyType"/>
+        </xs:choice>
+    </xs:complexType>
+    
+    <xs:complexType name="policyType">
+        <xs:attribute name="name" use="required"/>
+        <xs:attribute name="file" use="optional"/>
     </xs:complexType>
 
 </xs:schema>

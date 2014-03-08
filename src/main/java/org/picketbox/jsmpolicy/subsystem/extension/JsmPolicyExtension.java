@@ -154,33 +154,37 @@ public class JsmPolicyExtension implements Extension {
 
         public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context)
                 throws XMLStreamException {
+
             context.startSubsystemElement(JsmPolicyExtension.NAMESPACE, false); // goto subsystem
-            {
+            ModelNode subsystem = context.getModelNode();
+
+            if(subsystem.has("server")){
                 writer.writeStartElement("servers"); // begin servers
-                ModelNode node = context.getModelNode();
-                ModelNode type = node.get("server");
-                for (Property property : type.asPropertyList()) {
+
+                for (Property property : subsystem.get("server").asPropertyList()) {
                     writer.writeStartElement("server"); // begin server
                     writer.writeAttribute("name", property.getName());
                     ModelNode entry = property.getValue(); // get server ModelNode
-                    ServerDefinition.POLICY.marshallAsAttribute(entry, true, writer); // attribute policy (entry=>writer)
+                    if(!entry.asString().equals("undefined"))
+                        ServerDefinition.POLICY.marshallAsAttribute(entry, true, writer); // attribute policy (entry=>writer)
                     writer.writeEndElement(); // end server
                 }
                 writer.writeEndElement(); // end servers
             }
-            {
+
+            if(subsystem.has("policy")){
                 writer.writeStartElement("policies"); // begin policies
-                ModelNode node = context.getModelNode();
-                ModelNode type = node.get("policy");
-                for (Property property : type.asPropertyList()) {
+                for (Property property : subsystem.get("policy").asPropertyList()) {
                     writer.writeStartElement("policy"); // begin policy
                     writer.writeAttribute("name", property.getName());
                     ModelNode entry = property.getValue(); // get policy ModelNode
-                    PolicyDefinition.FILE.marshallAsAttribute(entry, true, writer); // attribute file (entry=>writer)
+                    if(!entry.asString().equals("undefined"))
+                        PolicyDefinition.FILE.marshallAsAttribute(entry, true, writer); // attribute file (entry=>writer)
                     writer.writeEndElement(); // end policy
                 }
                 writer.writeEndElement(); // end policies
             }
+
             writer.writeEndElement(); // end subsystem
         }
     }
