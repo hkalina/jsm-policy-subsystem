@@ -14,6 +14,7 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.SimpleResourceDefinition;
+import org.jboss.as.controller.operations.validation.ParameterValidator;
 import org.jboss.as.controller.registry.AttributeAccess;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.as.controller.registry.Resource.ResourceEntry;
@@ -35,6 +36,15 @@ public class PolicyDefinition extends SimpleResourceDefinition {
                     .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
                     .setDefaultValue(null)
                     .setAllowNull(true)
+                    .setValidator(new ParameterValidator(){
+                        public void validateParameter(String parameterName, ModelNode value) throws OperationFailedException {
+                            if(value.getType() == ModelType.UNDEFINED) return;
+                            if(value.getType() != ModelType.STRING) throw new PolicyFileUnvalidException("Content of policy file must be string!");
+                            PolicyManager.INSTANCE.validatePolicyFile(value.asString());
+                        }
+                        public void validateResolvedParameter(String parameterName, ModelNode value) throws OperationFailedException {
+                            validateParameter(parameterName, value);
+                        }})
                     .build();
 
     private PolicyDefinition() {
@@ -120,4 +130,10 @@ public class PolicyDefinition extends SimpleResourceDefinition {
         }
     }
 
+    static class PolicyFileUnvalidException extends OperationFailedException {
+        private static final long serialVersionUID = -4334271890304426959L;
+        public PolicyFileUnvalidException(String message) {
+            super(message);
+        }
+    }
 }

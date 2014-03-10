@@ -1,7 +1,7 @@
 package org.picketbox.jsmpolicy.subsystem.extension;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,6 +34,9 @@ public class PolicyManager {
 
 	    System.err.println("setPolicyFile("+fileContent+")");
 
+        validatePolicyFile(fileContent);
+        System.err.println("Validation OK");
+
 	    if(fileContent==null){
 	        setPolicy(null);
 	    }else{
@@ -64,23 +67,24 @@ public class PolicyManager {
         if(policy==null){
             System.setSecurityManager(null);
         }else{
-            validatePolicyFile(policy);
-            System.err.println("Validation OK");
-
             System.setProperty("java.security.policy", policy);
             Policy.getPolicy().refresh();
             System.setSecurityManager(new SecurityManager());
         }
 	}
 
-	public void validatePolicyFile(String path) throws OperationFailedException {
+	public void validatePolicyFile(String file) throws OperationFailedException {
+	    if(file==null) return;
 	    try{
-	        InputStreamReader isr = new InputStreamReader(new FileInputStream(path));
+	        ByteArrayInputStream bais = new ByteArrayInputStream(file.getBytes());
+	        InputStreamReader isr = new InputStreamReader(bais);
 	        PolicyParser pp = new PolicyParser(true);
 	        pp.read(isr);
+	        isr.close();
+	        bais.close();
 	    }
 	    catch(PolicyParser.ParsingException e){
-	        throw new OperationFailedException("Parsing exception when parsing policy file from DMR: "+e.getLocalizedMessage());
+	        throw new OperationFailedException("Policy file parsing exception: "+e.getLocalizedMessage());
 	    }
 	    catch(FileNotFoundException e){
 	        throw new OperationFailedException("Temporary policy file not found: "+e.getLocalizedMessage());

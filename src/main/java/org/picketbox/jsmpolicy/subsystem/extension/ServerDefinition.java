@@ -43,11 +43,10 @@ public class ServerDefinition extends SimpleResourceDefinition {
         resourceRegistration.registerReadWriteAttribute(POLICY, null, ServerWriteAttributeHandler.INSTANCE);
     }
 
-    public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicyValue) throws OperationFailedException {
+    public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicy) throws OperationFailedException {
 
         String changedServer = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        String policy = newPolicyValue==null ? null : newPolicyValue.asString();
-        if(policy!=null && policy.equals("undefined")) policy = null;
+        String policy = (newPolicy==null || newPolicy.getType()==ModelType.UNDEFINED) ? null : newPolicy.asString();
 
         if(System.getProperty("jboss.server.name").equals(changedServer)){
             String file = null;
@@ -56,7 +55,6 @@ public class ServerDefinition extends SimpleResourceDefinition {
                 ModelNode address = new ModelNode();
                 address.add("subsystem", "jsmpolicy");
                 address.add("policy", policy);
-
                 ModelNode result = context.readResourceFromRoot(PathAddress.pathAddress(address)).getModel();
                 file = result.get("file").asString();
             }
