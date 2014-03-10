@@ -105,6 +105,35 @@ public class PolicyDefinition extends SimpleResourceDefinition {
 
         protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
                 throws OperationFailedException {
+
+            String deletingPolicyName = operation.get("address").get(1).get("policy").asString();
+
+            //throw new OperationFailedException("PolicyRemove affectedPolicyName: "+affectedPolicy);
+
+            ModelNode address = new ModelNode();
+            address.add("subsystem", "jsmpolicy");
+
+            Set<ResourceEntry> set = context.readResourceFromRoot(PathAddress.pathAddress(address),true).getChildren("server");
+            Iterator<ResourceEntry> it = set.iterator();
+            while(it.hasNext()){
+                ResourceEntry server = it.next();
+                String serverName = server.getName();
+                String serverPolicy = server.getModel().get("policy").asString();
+
+                // for servers using deleting policy
+                if(serverPolicy.equals(deletingPolicyName) && serverName.equals(System.getProperty("jboss.server.name"))){
+
+                    throw new OperationFailedException("Removing policy ("+deletingPolicyName+") is deployed on server "+serverName);
+                    /*
+                    log.warn("Removed policy was used on server \""+serverName+"\", this server will be deleted");
+                    ModelNode serverAddress = new ModelNode();
+                    serverAddress.add("subsystem", "jsmpolicy");
+                    serverAddress.add("server", "serverName");
+                    context.removeResource(PathAddress.pathAddress(address));
+                    */
+                }
+            }
+
         }
     }
 

@@ -3,6 +3,8 @@ JBOSS_PATH = ../wildfly-8.0.0.CR1
 
 all: compile install domain
 
+all1: compile install run
+
 compile:
 	mvn -Dmaven.test.skip=true clean install
 

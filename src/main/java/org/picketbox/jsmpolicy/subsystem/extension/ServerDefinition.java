@@ -15,6 +15,7 @@ import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.registry.AttributeAccess;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
+import org.jboss.as.controller.registry.Resource;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.msc.service.ServiceController;
@@ -55,8 +56,9 @@ public class ServerDefinition extends SimpleResourceDefinition {
                 ModelNode address = new ModelNode();
                 address.add("subsystem", "jsmpolicy");
                 address.add("policy", policy);
-                ModelNode result = context.readResourceFromRoot(PathAddress.pathAddress(address)).getModel();
-                file = result.get("file").asString();
+                Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
+                ModelNode fileNode = resource.getModel().get("file");
+                if(fileNode.getType()==ModelType.STRING) file = fileNode.asString();
             }
             PolicyManager.INSTANCE.setPolicyFile(file);
         }
