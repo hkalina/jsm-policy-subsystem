@@ -1,5 +1,0 @@
-<subsystem xmlns="urn:org.picketbox.jsmPolicy:1.0">
-    <servers>
-        <server name="test-server" policy="test.policy"/>
-    </servers>
-</subsystem>

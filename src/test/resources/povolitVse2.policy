@@ -1,6 +1,0 @@
-/* Povolit vse */
-grant {
-  permission java.security.AllPermission;
-  permission java.util.PropertyPermission "TEST2.povolitVSE","read,write";
-};
-

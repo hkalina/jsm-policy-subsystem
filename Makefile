@@ -18,5 +18,5 @@ domain:
 	$(JBOSS_PATH)/bin/domain.sh
 
 test:
-	mvn clean install
+	mvn test
 
