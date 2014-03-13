@@ -200,7 +200,7 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
     }
 
     @Test
-    public void testInstallIntoController() throws Exception { // TODO
+    public void testInstallIntoController() throws Exception {
         //Parse the subsystem xml and install into the controller
         String subsystemXml =
                 "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
@@ -212,20 +212,145 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
                 "   </policies>" +
                 "</subsystem>";
 
+        System.setProperty("jboss.server.name","testing-server");
         KernelServices services = super.installInController(subsystemXml);
 
         //Read the whole model and make sure it looks as expected
         ModelNode model = services.readWholeModel();
 
-        Assert.assertEquals("",model.toJSONString(true)); // DEBUG
-
-        /*
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(JsmPolicyExtension.SUBSYSTEM_NAME));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("type"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type").hasDefined("tst"));
-        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("tick"));
-        Assert.assertEquals(12345, model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "type", "tst", "tick").asLong());
-        */
+
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server").hasDefined("test-server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server").hasDefined("policy"));
+        Assert.assertEquals("test-policy", model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString());
+
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("policy"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy").hasDefined("test-policy"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy").hasDefined("file"));
+        Assert.assertEquals("grant { permission java.security.AllPermission; };", model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy", "file").asString());
+
     }
 
+    @Test
+    public void testDescribeHandler() throws Exception {
+        //Parse the subsystem xml and install into the first controller
+        String subsystemXml =
+                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
+                "</subsystem>";
+
+        System.setProperty("jboss.server.name","testing-server");
+        KernelServices servicesA = super.installInController(subsystemXml);
+
+        //Get the model and the describe operations from the first controller
+        ModelNode modelA = servicesA.readWholeModel();
+        ModelNode describeOp = new ModelNode();
+        describeOp.get(OP).set(DESCRIBE);
+        describeOp.get(OP_ADDR).set(PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME)).toModelNode());
+
+        List<ModelNode> operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();
+
+        //Install the describe options from the first controller into a second controller
+        KernelServices servicesB = super.installInController(operations);
+        ModelNode modelB = servicesB.readWholeModel();
+
+        //Make sure the models from the two controllers are identical
+        super.compare(modelA, modelB);
+    }
+
+    @Test
+    public void testSubsystemRemoval() throws Exception {
+        //Parse the subsystem xml and install into the first controller
+        String subsystemXml =
+                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
+                "   <servers>" +
+                "       <server name=\"test-server\" policy=\"test.policy\"/>" +
+                "   </servers>" +
+                "</subsystem>";
+
+        System.setProperty("jboss.server.name","testing-server");
+        KernelServices services = super.installInController(subsystemXml);
+        super.assertRemoveSubsystemResources(services);
+    }
+
+    @Test
+    public void testExecuteOperations() throws Exception {
+        String subsystemXml =
+                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
+                "   <policies>" +
+                "       <policy name=\"first-policy\" file=\"grant {};\"/>" +
+                "   </policies>" +
+                "</subsystem>";
+
+        System.setProperty("jboss.server.name","testing-server");
+        KernelServices services = super.installInController(subsystemXml);
+
+        // Add new policy
+        PathAddress newPolicyAddr = PathAddress.pathAddress(
+            PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME),
+            PathElement.pathElement("policy", "test-policy")
+        );
+        ModelNode addNewPolicyOp = new ModelNode();
+        addNewPolicyOp.get(OP).set(ADD);
+        addNewPolicyOp.get(OP_ADDR).set(newPolicyAddr.toModelNode());
+        addNewPolicyOp.get("file").set("grant { permission java.security.AllPermission; };");
+        ModelNode resultPolicy = services.executeOperation(addNewPolicyOp);
+        Assert.assertEquals(SUCCESS, resultPolicy.get(OUTCOME).asString());
+
+        // Add new server
+        PathAddress newServerAddr = PathAddress.pathAddress(
+            PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME),
+            PathElement.pathElement("server", "test-server")
+        );
+        ModelNode addNewServerOp = new ModelNode();
+        addNewServerOp.get(OP).set(ADD);
+        addNewServerOp.get(OP_ADDR).set(newServerAddr.toModelNode());
+        addNewServerOp.get("policy").set("test-policy");
+        ModelNode resultServer = services.executeOperation(addNewServerOp);
+        Assert.assertEquals(SUCCESS, resultServer.get(OUTCOME).asString());
+
+        ModelNode model = services.readWholeModel();
+        Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(JsmPolicyExtension.SUBSYSTEM_NAME));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("policy"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy").hasDefined("test-policy"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy").hasDefined("file"));
+        Assert.assertEquals("grant { permission java.security.AllPermission; };",model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy", "file").asString());
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server").hasDefined("test-server"));
+        Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server").hasDefined("policy"));
+        Assert.assertEquals("test-policy",model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString());
+
+        // Write-attribute file of policy
+        ModelNode writePolicyOp = new ModelNode();
+        writePolicyOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
+        writePolicyOp.get(OP_ADDR).set(newPolicyAddr.toModelNode());
+        writePolicyOp.get(NAME).set("file");
+        writePolicyOp.get(VALUE).set("grant {};");
+        ModelNode resultPolicyWrite = services.executeOperation(writePolicyOp);
+        Assert.assertEquals(SUCCESS, resultPolicyWrite.get(OUTCOME).asString());
+
+        ModelNode readPolicyOp = new ModelNode();
+        readPolicyOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
+        readPolicyOp.get(OP_ADDR).set(newPolicyAddr.toModelNode());
+        readPolicyOp.get(NAME).set("file");
+        resultPolicyWrite = services.executeOperation(readPolicyOp);
+        Assert.assertEquals("grant {};", checkResultAndGetContents(resultPolicyWrite).asString());
+
+        // Write-attribute policy of server
+        ModelNode writeServerOp = new ModelNode();
+        writeServerOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
+        writeServerOp.get(OP_ADDR).set(newServerAddr.toModelNode());
+        writeServerOp.get(NAME).set("policy");
+        writeServerOp.get(VALUE).set("first-policy");
+        ModelNode resultServerWrite = services.executeOperation(writeServerOp);
+        Assert.assertEquals(SUCCESS, resultServerWrite.get(OUTCOME).asString());
+
+        ModelNode readServerOp = new ModelNode();
+        readServerOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
+        readServerOp.get(OP_ADDR).set(newServerAddr.toModelNode());
+        readServerOp.get(NAME).set("policy");
+        resultServerWrite = services.executeOperation(readServerOp);
+        Assert.assertEquals("first-policy", checkResultAndGetContents(resultServerWrite).asString());
+
+    }
 }

@@ -26,7 +26,7 @@ public class PolicyManager {
 	private PolicyManager(){}
 
 	/**
-	 * Set policy file used on this JVM
+	 * Set policy file used on this JVM by content
 	 * @param fileContent Content of policy file to use
 	 * @throws OperationFailedException
 	 */
@@ -41,7 +41,9 @@ public class PolicyManager {
 	        setPolicy(null);
 	    }else{
 	        try{
-	            File temp = File.createTempFile("jsm-",".policy");
+	            String tempDirString = System.getProperty("jboss.server.temp.dir",null);
+	            File tempDir = tempDirString==null ? null : new File(tempDirString);
+	            File temp = File.createTempFile("jsm-", ".policy", tempDir);
 
 	            FileOutputStream out = new FileOutputStream(temp);
 	            out.write(fileContent.getBytes());
@@ -58,11 +60,11 @@ public class PolicyManager {
 	}
 
 	/**
-	 * Set policy file used on this JVM
+	 * Set policy file used on this JVM by file URL
 	 * @param policy URL of policy file (null means disable JSM)
 	 * @throws OperationFailedException
 	 */
-	public void setPolicy(String policy) throws OperationFailedException {
+	protected void setPolicy(String policy) throws OperationFailedException {
         System.err.println("setPolicy("+policy+")");
         if(policy==null){
             System.setSecurityManager(null);
@@ -73,10 +75,15 @@ public class PolicyManager {
         }
 	}
 
-	public void validatePolicyFile(String file) throws OperationFailedException {
-	    if(file==null) return;
+	/**
+	 * Validate policy file by content
+	 * @param fileContent
+	 * @throws OperationFailedException
+	 */
+	public void validatePolicyFile(String fileContent) throws OperationFailedException {
+	    if(fileContent==null) return;
 	    try{
-	        ByteArrayInputStream bais = new ByteArrayInputStream(file.getBytes());
+	        ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes());
 	        InputStreamReader isr = new InputStreamReader(bais);
 	        PolicyParser pp = new PolicyParser(true);
 	        pp.read(isr);
@@ -86,14 +93,14 @@ public class PolicyManager {
 	    catch(PolicyParser.ParsingException e){
 	        throw new OperationFailedException("Policy file parsing exception: "+e.getLocalizedMessage());
 	    }
-	    catch(FileNotFoundException e){
-	        throw new OperationFailedException("Temporary policy file not found: "+e.getLocalizedMessage());
-	    }
 	    catch(IOException e){
 	        throw new OperationFailedException("IOException when validating policy file: "+e.getLocalizedMessage());
         }
 	}
 
+	/**
+	 * Experimental refresh for DelegatingPolicy
+	 */
 	public void refreshDelegatingPolicy(){
 		try{
 			Class.forName("org.jboss.security.jacc.DelegatingPolicy"); // catch not existing JACC
@@ -109,6 +116,9 @@ public class PolicyManager {
 		log.info("JsmPolicy: non-JACC refresh");
 	}
 
+	/**
+	 * Debug
+	 */
 	public void printStatus(){
 		Policy p = Policy.getPolicy();
 		String name = p==null ? "null" : p.getClass().getName();
