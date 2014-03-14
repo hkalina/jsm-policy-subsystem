@@ -18,11 +18,14 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.as.controller.registry.Resource;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
+import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 
 public class ServerDefinition extends SimpleResourceDefinition {
 
 	public static final ServerDefinition INSTANCE = new ServerDefinition();
+
+	private static final Logger log = Logger.getLogger(ServerDefinition.class);
 
     protected static final SimpleAttributeDefinition POLICY =
             new SimpleAttributeDefinitionBuilder("policy", ModelType.STRING)
@@ -58,7 +61,13 @@ public class ServerDefinition extends SimpleResourceDefinition {
                 address.add("policy", policy);
                 Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
                 ModelNode fileNode = resource.getModel().get("file");
-                if(fileNode.getType()==ModelType.STRING) file = fileNode.asString();
+                if(fileNode.getType()==ModelType.UNDEFINED){
+                    file = null;
+                }else if(fileNode.getType()==ModelType.STRING || fileNode.getType()==ModelType.EXPRESSION){
+                    file = fileNode.asString();
+                }else{
+                    log.error("Type of attributte file value is unexpected - "+fileNode.getType().toString());
+                }
             }
             PolicyManager.INSTANCE.setPolicyFile(file);
         }

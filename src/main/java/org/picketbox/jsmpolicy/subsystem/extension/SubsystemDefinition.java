@@ -54,5 +54,9 @@ public class SubsystemDefinition extends SimpleResourceDefinition {
 
 	    private SubsystemRemove() {}
 
+	    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
+	        PolicyManager.INSTANCE.setPolicyFile(null);
+        }
+
 	}
 }
