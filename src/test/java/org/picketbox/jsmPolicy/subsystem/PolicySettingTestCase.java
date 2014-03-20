@@ -107,16 +107,34 @@ public class PolicySettingTestCase {
 
     }
 
+    @Test
+    public void testPolicySwitchingToTheSame() throws Exception {
+
+        assertTrue(isFileReadable(testingFile1));
+        assertTrue(isFileReadable(testingFile2));
+
+        PolicyManager.INSTANCE.setPolicyFile(policyAllowingTestingFile1);
+
+        assertTrue(isFileReadable(testingFile1));
+        assertFalse(isFileReadable(testingFile2));
+
+        PolicyManager.INSTANCE.setPolicyFile(policyAllowingTestingFile1);
+
+        assertTrue(isFileReadable(testingFile1));
+        assertFalse(isFileReadable(testingFile2));
+
+    }
+
     public boolean isFileReadable(File file) throws IOException{
         try{
             FileInputStream is = new FileInputStream(file);
             is.read();
             is.close();
-            System.out.println("File "+file.getName()+" readable");
+            //System.out.println("File "+file.getName()+" readable");
             return true;
         }
         catch(AccessControlException e){
-            System.out.println("File "+file.getName()+" not readable");
+            //System.out.println("File "+file.getName()+" not readable");
             return false;
         }
     }

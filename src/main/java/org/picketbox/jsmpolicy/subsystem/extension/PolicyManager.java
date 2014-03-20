@@ -16,12 +16,13 @@ import sun.security.provider.PolicyParser;
 /**
  * Work with security manager and security policy files
  */
-@SuppressWarnings("restriction")
 public class PolicyManager {
 
 	public static final PolicyManager INSTANCE = new PolicyManager();
 
 	private static final Logger log = Logger.getLogger(PolicyManager.class);
+
+	protected static String currentPolicyFileContent = null;
 
 	private PolicyManager(){}
 
@@ -32,10 +33,13 @@ public class PolicyManager {
 	 */
 	public void setPolicyFile(String fileContent) throws OperationFailedException {
 
-	    System.err.println("setPolicyFile("+fileContent+")");
+	    if(isCurrentPolicyFileContent(fileContent)){
+	        log.warn("Setting of policy skipped - policy is already used");
+	        return;
+	    }
 
         validatePolicyFile(fileContent);
-        System.err.println("Validation OK");
+        log.info("Setting of policy - validation OK");
 
 	    if(fileContent==null){
 	        setPolicy(null);
@@ -57,6 +61,7 @@ public class PolicyManager {
                 throw new OperationFailedException("setPolicyFile IOException: "+e.getLocalizedMessage());
             }
 	    }
+	    currentPolicyFileContent = fileContent; // if all successful, set as current
 	}
 
 	/**
@@ -65,7 +70,7 @@ public class PolicyManager {
 	 * @throws OperationFailedException
 	 */
 	protected void setPolicy(String policy) throws OperationFailedException {
-        System.err.println("setPolicy("+policy+")");
+        log.info("Setting of policy from file "+policy);
         if(policy==null){
             System.setSecurityManager(null);
         }else{
@@ -75,18 +80,31 @@ public class PolicyManager {
         }
 	}
 
+	protected boolean isCurrentPolicyFileContent(String fileContent){
+	    if(fileContent==null && currentPolicyFileContent==null) return true;
+	    if(fileContent==null && currentPolicyFileContent!=null) return false;
+	    return fileContent.equals(currentPolicyFileContent); // fileContent!=null
+	}
+
+	public String getCurrentPolicyFileContent(){
+	    return currentPolicyFileContent;
+	}
+
 	/**
 	 * Validate policy file by content
 	 * @param fileContent
 	 * @throws OperationFailedException
 	 */
+	@SuppressWarnings("restriction")
 	public void validatePolicyFile(String fileContent) throws OperationFailedException {
 	    if(fileContent==null) return;
 	    try{
 	        ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes());
 	        InputStreamReader isr = new InputStreamReader(bais);
+
 	        PolicyParser pp = new PolicyParser(true);
 	        pp.read(isr);
+
 	        isr.close();
 	        bais.close();
 	    }
