@@ -2,6 +2,7 @@ package org.picketbox.jsmpolicy.subsystem.extension;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIBE;
 
+import java.security.Policy;
 import java.util.List;
 
 import org.jboss.as.controller.AbstractBoottimeAddStepHandler;
@@ -44,6 +45,18 @@ public class SubsystemDefinition extends SimpleResourceDefinition {
 	    public void performBoottime(OperationContext context, ModelNode operation, ModelNode model,
 	            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
 	            throws OperationFailedException {
+
+	        try{
+	            Policy p = Policy.getPolicy();
+	            System.err.println("POLICY: "+(p==null?"null":p.getClass().getName()));
+	        }
+	        catch(Exception e){}
+
+	        try{
+	            SecurityManager sm = System.getSecurityManager();
+                System.err.println("SM: "+(sm==null?"null":sm.getClass().getName()));
+            }
+            catch(Exception e){}
 
 	    }
 	}

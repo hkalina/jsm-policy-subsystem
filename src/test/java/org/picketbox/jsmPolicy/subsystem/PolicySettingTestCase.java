@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.picketbox.jsmpolicy.subsystem.extension.PolicyManager;
 
-public class PolicyManagerTestCase {
+public class PolicySettingTestCase {
 
     // two different files for testing file readability
     private File testingFile1 = new File("/etc/passwd");
