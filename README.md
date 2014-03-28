@@ -8,7 +8,7 @@ This is Java Security Manager Policy subsystem for JBoss/Wildfly. It consist of 
 * [jsm-policy-test](https://github.com/honza889/jsm-policy-test) - test of backend subsystem
 
 Successful changing of policy require also this patches of WildFly:
-* [https://github.com/honza889/security-manager](https://github.com/honza889/security-manager)
+* [security-manager](https://github.com/honza889/security-manager)
 * [jboss-modules](https://github.com/honza889/jboss-modules)
 
 
