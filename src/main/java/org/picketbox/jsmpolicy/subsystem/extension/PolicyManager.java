@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.security.Policy;
 
 import org.jboss.as.controller.OperationFailedException;
@@ -33,10 +34,14 @@ public class PolicyManager {
 	 */
 	public void setPolicyFile(String fileContent) throws OperationFailedException {
 
+	    System.err.println("setPolicyFile("+fileContent+")");
+
+	    /*
 	    if(isCurrentPolicyFileContent(fileContent)){
 	        log.warn("Setting of policy skipped - policy is already used");
 	        return;
 	    }
+	    */
 
         validatePolicyFile(fileContent);
         log.info("Setting of policy - validation OK");
@@ -72,12 +77,51 @@ public class PolicyManager {
 	protected void setPolicy(String policy) throws OperationFailedException {
         log.info("Setting of policy from file "+policy);
         if(policy==null){
-            System.setSecurityManager(null);
+            //System.setSecurityManager(null);
         }else{
             System.setProperty("java.security.policy", policy);
             Policy.getPolicy().refresh();
-            System.setSecurityManager(new SecurityManager());
+            refreshDelegatingPolicy();
+            System.err.println("refreshed "+Policy.getPolicy());
+            //System.setSecurityManager(new SecurityManager());
         }
+        //test();
+	}
+
+	public void refreshDelegatingPolicy(){
+        Policy p = Policy.getPolicy();
+	    try {
+            Class<?> delegatingPolicy = Class.forName("org.jboss.security.jacc.DelegatingPolicy");
+            if(delegatingPolicy.isInstance(p)){
+                System.err.println("is delegating");
+
+                Field f = delegatingPolicy.getDeclaredField("delegate");
+                f.setAccessible(true);
+                Policy in = (Policy) f.get(p);
+                in.refresh();
+
+            }else{
+                System.err.println("not delegating");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	}
+
+	public void test(){
+	    /*
+	    try {
+            Class wsm = Class.forName("org.wildfly.security.manager.WildFlySecurityManager");
+            wsm.newInstance();
+            System.out.println("TEST: "+wsm.toString());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+	    */
 	}
 
 	protected boolean isCurrentPolicyFileContent(String fileContent){
@@ -116,30 +160,4 @@ public class PolicyManager {
         }
 	}
 
-	/**
-	 * Experimental refresh for DelegatingPolicy
-	 */
-	public void refreshDelegatingPolicy(){
-		try{
-			Class.forName("org.jboss.security.jacc.DelegatingPolicy"); // catch not existing JACC
-			if(Policy.getPolicy() instanceof org.jboss.security.jacc.DelegatingPolicy){
-				((org.jboss.security.jacc.DelegatingPolicy)Policy.getPolicy()).getPolicyProxy().refresh();
-				log.info("JsmPolicy: JACC refresh");
-				return;
-			}
-		}
-		catch(ClassNotFoundException e){}
-
-		Policy.getPolicy().refresh(); // non-JACC policy
-		log.info("JsmPolicy: non-JACC refresh");
-	}
-
-	/**
-	 * Debug
-	 */
-	public void printStatus(){
-		Policy p = Policy.getPolicy();
-		String name = p==null ? "null" : p.getClass().getName();
-		System.err.println("JsmPolicy: Policy="+name);
-	}
 }

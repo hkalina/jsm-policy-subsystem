@@ -48,7 +48,6 @@ public class ServerDefinition extends SimpleResourceDefinition {
     }
 
     public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicy) throws OperationFailedException {
-
         String changedServer = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         String policy = (newPolicy==null || newPolicy.getType()==ModelType.UNDEFINED) ? null : newPolicy.asString();
 

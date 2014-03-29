@@ -17,7 +17,7 @@
         
         
         <!-- org.jboss.security.jacc.DelegatingPolicy -->
-        <!--<module name="org.picketbox" optional="true"/>-->
+        <module name="org.picketbox" optional="true"/>
         
     </dependencies>
 </module>

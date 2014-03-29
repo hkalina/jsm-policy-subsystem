@@ -1,5 +1,5 @@
 # Path to JBoss AS / EAP / Wildfly
-JBOSS_PATH = ../wildfly-8.0.0.CR1
+JBOSS_PATH = ../wildfly-8.0.1.Final-SNAPSHOT
 
 all: compile install domain
 
