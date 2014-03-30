@@ -170,11 +170,18 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- kvuli org.jboss.security.jacc.DelegatingPolicy -->
+        <!-- org.jboss.security.jacc.DelegatingPolicy -->
         <dependency>
         	<groupId>org.picketbox</groupId>
         	<artifactId>jbosssx-bare</artifactId>
-        	<version>4.0.20.Beta1</version>
+        	<version>4.0.20.Final</version>
+        </dependency>
+        
+        <!-- org.jboss.modules.ModulesPolicy -->
+        <dependency>
+        	<groupId>org.jboss.modules</groupId>
+        	<artifactId>jboss-modules</artifactId>
+        	<version>1.3.3.Final</version>
         </dependency>
         
     </dependencies>

@@ -11,6 +11,8 @@ import java.security.Policy;
 
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.logging.Logger;
+import org.jboss.security.jacc.DelegatingPolicy;
+
 
 import sun.security.provider.PolicyParser;
 
@@ -85,11 +87,10 @@ public class PolicyManager {
             System.err.println("refreshed "+Policy.getPolicy());
             //System.setSecurityManager(new SecurityManager());
         }
-        //test();
 	}
 
 	public void refreshDelegatingPolicy(){
-        Policy p = Policy.getPolicy();
+	    Policy p = Policy.getPolicy();
 	    try {
             Class<?> delegatingPolicy = Class.forName("org.jboss.security.jacc.DelegatingPolicy");
             if(delegatingPolicy.isInstance(p)){
@@ -99,6 +100,7 @@ public class PolicyManager {
                 f.setAccessible(true);
                 Policy in = (Policy) f.get(p);
                 in.refresh();
+                System.err.println("refreshed delegated "+in.toString());
 
             }else{
                 System.err.println("not delegating");
@@ -106,22 +108,6 @@ public class PolicyManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-	}
-
-	public void test(){
-	    /*
-	    try {
-            Class wsm = Class.forName("org.wildfly.security.manager.WildFlySecurityManager");
-            wsm.newInstance();
-            System.out.println("TEST: "+wsm.toString());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-	    */
 	}
 
 	protected boolean isCurrentPolicyFileContent(String fileContent){
