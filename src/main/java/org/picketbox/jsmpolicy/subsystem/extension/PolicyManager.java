@@ -12,7 +12,7 @@ import java.security.Policy;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.logging.Logger;
 import org.jboss.security.jacc.DelegatingPolicy;
-
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 import sun.security.provider.PolicyParser;
 
@@ -22,10 +22,10 @@ import sun.security.provider.PolicyParser;
 public class PolicyManager {
 
 	public static final PolicyManager INSTANCE = new PolicyManager();
-
 	private static final Logger log = Logger.getLogger(PolicyManager.class);
 
 	protected static String currentPolicyFileContent = null;
+	protected SecurityManager oldSecurityManager = null;
 
 	private PolicyManager(){}
 
@@ -71,21 +71,42 @@ public class PolicyManager {
 	    currentPolicyFileContent = fileContent; // if all successful, set as current
 	}
 
+	public void enableSecurityManager(){
+	    SecurityManager sm = System.getSecurityManager();
+	    if(sm!=null){
+	        oldSecurityManager = sm;
+	        return;
+	    }
+	    if(oldSecurityManager!=null){
+	        System.setSecurityManager(oldSecurityManager);
+	    }else{
+	        WildFlySecurityManager.install();
+	    }
+	}
+
+	public void disableSecurityManager(){
+	    SecurityManager sm = System.getSecurityManager();
+	    if(sm!=null){
+	        oldSecurityManager = sm;
+	    }
+	    System.setSecurityManager(null);
+    }
+
 	/**
 	 * Set policy file used on this JVM by file URL
 	 * @param policy URL of policy file (null means disable JSM)
 	 * @throws OperationFailedException
 	 */
-	protected void setPolicy(String policy) throws OperationFailedException {
+	public void setPolicy(String policy) throws OperationFailedException {
         log.info("Setting of policy from file "+policy);
         if(policy==null){
-            //System.setSecurityManager(null);
+            disableSecurityManager();
         }else{
             System.setProperty("java.security.policy", policy);
             Policy.getPolicy().refresh();
             refreshDelegatingPolicy();
             System.err.println("refreshed "+Policy.getPolicy());
-            //System.setSecurityManager(new SecurityManager());
+            enableSecurityManager();
         }
 	}
 
@@ -110,7 +131,7 @@ public class PolicyManager {
         }
 	}
 
-	protected boolean isCurrentPolicyFileContent(String fileContent){
+	public boolean isCurrentPolicyFileContent(String fileContent){
 	    if(fileContent==null && currentPolicyFileContent==null) return true;
 	    if(fileContent==null && currentPolicyFileContent!=null) return false;
 	    return fileContent.equals(currentPolicyFileContent); // fileContent!=null

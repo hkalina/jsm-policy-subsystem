@@ -43,8 +43,16 @@ public class PolicySettingTestCase {
 
     @Before
     public void initPolicyManagerTests(){
+
         // ${jboss.server.temp.dir} := /tmp (directory for temporary policy files)
         System.setProperty("jboss.server.temp.dir",System.getProperty("java.io.tmpdir"));
+
+        // TODO: remove and ensure functionality with WildFlySecurityManager
+        // previous used security manager for this test will be java.lang.SecurityManager
+        System.setProperty("java.security.policy","/home/honza/Wildfly/orezaneWildfly/all.policy");
+        System.setSecurityManager(new SecurityManager());
+        PolicyManager.INSTANCE.disableSecurityManager();
+
     }
 
     @Test
