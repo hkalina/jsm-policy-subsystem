@@ -39,7 +39,7 @@ Successful changing of policy require also this patches of WildFly:
   ```
   cp -r target/module/* $(JBOSS_PATH)/modules/system/layers/base/
   $(JBOSS_PATH)/bin/jboss-cli.sh
-  [standalone@localhost:9999 /] **/extension=org.picketbox.jsmpolicy.subsystem:add**
-  [standalone@localhost:9999 /] **/subsystem=jsmpolicy:add**
+  [standalone@localhost:9999 /] /extension=org.picketbox.jsmpolicy.subsystem:add
+  [standalone@localhost:9999 /] /subsystem=jsmpolicy:add
   ```
 

@@ -134,7 +134,7 @@ public class PolicyManager {
 	public boolean isCurrentPolicyFileContent(String fileContent){
 	    if(fileContent==null && currentPolicyFileContent==null) return true;
 	    if(fileContent==null && currentPolicyFileContent!=null) return false;
-	    return fileContent.equals(currentPolicyFileContent); // fileContent!=null
+	    return fileContent.equals(currentPolicyFileContent);
 	}
 
 	public String getCurrentPolicyFileContent(){
