@@ -34,14 +34,14 @@ public class PolicyManager {
 	 * @param fileContent Content of policy file to use
 	 * @throws OperationFailedException
 	 */
-	public void setPolicyFile(String fileContent) throws OperationFailedException {
+	public boolean setPolicyFile(String fileContent) throws OperationFailedException {
 
 	    System.err.println("setPolicyFile("+fileContent+")");
 
 	    /*
 	    if(isCurrentPolicyFileContent(fileContent)){
 	        log.warn("Setting of policy skipped - policy is already used");
-	        return;
+	        return false; // policy need not to be changed
 	    }
 	    */
 
@@ -69,6 +69,7 @@ public class PolicyManager {
             }
 	    }
 	    currentPolicyFileContent = fileContent; // if all successful, set as current
+	    return true; // policy was changed
 	}
 
 	public void enableSecurityManager(){

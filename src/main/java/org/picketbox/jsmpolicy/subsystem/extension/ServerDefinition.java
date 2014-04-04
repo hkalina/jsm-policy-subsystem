@@ -1,5 +1,7 @@
 package org.picketbox.jsmpolicy.subsystem.extension;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import org.jboss.as.controller.AbstractAddStepHandler;
@@ -12,6 +14,10 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.SimpleResourceDefinition;
+import org.jboss.as.controller.client.MessageSeverity;
+import org.jboss.as.controller.client.ModelControllerClient;
+import org.jboss.as.controller.client.OperationMessageHandler;
+import org.jboss.as.controller.client.helpers.ClientConstants;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.registry.AttributeAccess;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
@@ -52,23 +58,49 @@ public class ServerDefinition extends SimpleResourceDefinition {
         String policy = (newPolicy==null || newPolicy.getType()==ModelType.UNDEFINED) ? null : newPolicy.asString();
 
         if(System.getProperty("jboss.server.name").equals(changedServer)){
-            String file = null;
-            if(policy!=null){
-                // getting policy file content
-                ModelNode address = new ModelNode();
-                address.add("subsystem", "jsmpolicy");
-                address.add("policy", policy);
-                Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
-                ModelNode fileNode = resource.getModel().get("file");
-                if(fileNode.getType()==ModelType.UNDEFINED){
-                    file = null;
-                }else if(fileNode.getType()==ModelType.STRING || fileNode.getType()==ModelType.EXPRESSION){
-                    file = fileNode.asString();
-                }else{
-                    log.error("Type of attributte file value is unexpected - "+fileNode.getType().toString());
+
+            String policyContent = getPolicyContent(context, policy);
+            boolean changed = PolicyManager.INSTANCE.setPolicyFile(policyContent);
+            if(changed) reloadServer();
+
+        }
+    }
+
+    protected static String getPolicyContent(OperationContext context, String policy) throws OperationFailedException {
+        if(policy==null) return null;
+
+        ModelNode address = new ModelNode();
+        address.add("subsystem", "jsmpolicy");
+        address.add("policy", policy);
+        Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
+        ModelNode fileNode = resource.getModel().get("file");
+
+        if(fileNode.getType()==ModelType.UNDEFINED){
+            return null;
+        }else if(fileNode.getType()==ModelType.STRING || fileNode.getType()==ModelType.EXPRESSION){
+            return fileNode.asString();
+        }else{
+            throw new OperationFailedException("Type of attributte file value is unexpected - "+fileNode.getType().toString());
+        }
+    }
+
+    protected static void reloadServer() throws OperationFailedException {
+        log.warn("reloading server");
+        try{
+            ModelControllerClient mcc = ModelControllerClient.Factory.create("localhost",9999);
+
+            ModelNode op = new ModelNode();
+            op.get("operation").set("reload");
+
+            mcc.executeAsync(op, new OperationMessageHandler() {
+                @Override
+                public void handleReport(MessageSeverity severity, String message) {
+                    log.warn("reloading server finished");
                 }
-            }
-            PolicyManager.INSTANCE.setPolicyFile(file);
+            });
+        }
+        catch(IOException e){
+            throw new OperationFailedException("IO exception when reloading server: "+e.getLocalizedMessage(),e);
         }
     }
 
