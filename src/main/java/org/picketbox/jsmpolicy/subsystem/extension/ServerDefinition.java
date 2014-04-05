@@ -1,5 +1,7 @@
 package org.picketbox.jsmpolicy.subsystem.extension;
 
+import static org.jboss.as.controller.client.ControllerClientLogger.ROOT_LOGGER;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -85,17 +87,35 @@ public class ServerDefinition extends SimpleResourceDefinition {
     }
 
     protected static void reloadServer() throws OperationFailedException {
-        log.warn("reloading server");
+        log.info("reloading server...");
         try{
             ModelControllerClient mcc = ModelControllerClient.Factory.create("localhost",9999);
 
             ModelNode op = new ModelNode();
             op.get("operation").set("reload");
 
+            String node = System.getProperty("jboss.node.name");
+            int separator = node.indexOf(':');
+            if(separator!=-1){ // if domain mode
+                op.get("address").add("host", node.substring(0, separator));
+                op.get("address").add("server", node.substring(separator+1));
+            }
+
             mcc.executeAsync(op, new OperationMessageHandler() {
                 @Override
                 public void handleReport(MessageSeverity severity, String message) {
-                    log.warn("reloading server finished");
+                    switch (severity) {
+                        case ERROR:
+                            ROOT_LOGGER.error("Server reloading: "+message);
+                            break;
+                        case WARN:
+                            ROOT_LOGGER.warn("Server reloading: "+message);
+                            break;
+                        case INFO:
+                        default:
+                            ROOT_LOGGER.trace("Server reloading: "+message);
+                            break;
+                    }
                 }
             });
         }
