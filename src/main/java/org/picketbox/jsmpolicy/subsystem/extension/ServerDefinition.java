@@ -3,6 +3,7 @@ package org.picketbox.jsmpolicy.subsystem.extension;
 import static org.jboss.as.controller.client.ControllerClientLogger.ROOT_LOGGER;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
 
             String policyContent = getPolicyContent(context, policy);
             boolean changed = PolicyManager.INSTANCE.setPolicyFile(policyContent);
-            if(changed) reloadServer();
+            if(changed && policy!=null) reloadServer();
 
         }
     }
@@ -89,7 +90,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
     protected static void reloadServer() throws OperationFailedException {
         log.info("reloading server...");
         try{
-            ModelControllerClient mcc = ModelControllerClient.Factory.create("localhost",9999);
+            final ModelControllerClient mcc = ModelControllerClient.Factory.create("localhost",9990);
 
             ModelNode op = new ModelNode();
             op.get("operation").set("reload");
@@ -116,8 +117,20 @@ public class ServerDefinition extends SimpleResourceDefinition {
                             ROOT_LOGGER.trace("Server reloading: "+message);
                             break;
                     }
+                    try {
+                        mcc.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
+        }
+        catch(RuntimeException e){
+            if(e.getCause() instanceof ConnectException){
+                throw new OperationFailedException("Could not refresh server, because connect connect to the server");
+            }else{
+                throw e;
+            }
         }
         catch(IOException e){
             throw new OperationFailedException("IO exception when reloading server: "+e.getLocalizedMessage(),e);
