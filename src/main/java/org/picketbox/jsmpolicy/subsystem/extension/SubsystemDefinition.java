@@ -2,7 +2,6 @@ package org.picketbox.jsmpolicy.subsystem.extension;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIBE;
 
-import java.security.Policy;
 import java.util.List;
 
 import org.jboss.as.controller.AbstractBoottimeAddStepHandler;
@@ -46,17 +45,12 @@ public class SubsystemDefinition extends SimpleResourceDefinition {
 	            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
 	            throws OperationFailedException {
 
-	        try{
-	            Policy p = Policy.getPolicy();
-	            System.err.println("POLICY: "+(p==null?"null":p.getClass().getName()));
+	        if(Boolean.parseBoolean(System.getProperty("jboss.modules.policy-permissions", "false"))==false){
+	            throw new OperationFailedException("\n"+
+	                    "JSM Policy Subsystem cannot work, because property jboss.modules.policy-permissions\n"+
+	                    "was not set to true - add following into your start script (e.g., standalone.sh):\n"+
+	                    "JAVA_OPTS=\"$JAVA_OPTS -Djboss.modules.policy-permissions=true\"");
 	        }
-	        catch(Exception e){}
-
-	        try{
-	            SecurityManager sm = System.getSecurityManager();
-                System.err.println("SM: "+(sm==null?"null":sm.getClass().getName()));
-            }
-            catch(Exception e){}
 
 	    }
 	}

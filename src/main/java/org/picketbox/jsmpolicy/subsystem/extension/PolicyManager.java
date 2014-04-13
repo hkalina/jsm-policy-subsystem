@@ -2,7 +2,6 @@ package org.picketbox.jsmpolicy.subsystem.extension;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,10 +10,7 @@ import java.security.Policy;
 
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.logging.Logger;
-import org.jboss.security.jacc.DelegatingPolicy;
 import org.wildfly.security.manager.WildFlySecurityManager;
-
-import sun.security.provider.PolicyParser;
 
 /**
  * Work with security manager and security policy files
@@ -154,13 +150,13 @@ public class PolicyManager {
 	        ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes());
 	        InputStreamReader isr = new InputStreamReader(bais);
 
-	        PolicyParser pp = new PolicyParser(true);
+	        sun.security.provider.PolicyParser pp = new sun.security.provider.PolicyParser(true);
 	        pp.read(isr);
 
 	        isr.close();
 	        bais.close();
 	    }
-	    catch(PolicyParser.ParsingException e){
+	    catch(sun.security.provider.PolicyParser.ParsingException e){
 	        throw new OperationFailedException("Policy file parsing exception: "+e.getLocalizedMessage());
 	    }
 	    catch(IOException e){
