@@ -1,10 +1,5 @@
 package org.picketbox.jsmpolicy.subsystem.extension;
 
-import static org.jboss.as.controller.client.ControllerClientLogger.ROOT_LOGGER;
-
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import org.jboss.as.controller.AbstractAddStepHandler;
@@ -17,38 +12,24 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.SimpleResourceDefinition;
-import org.jboss.as.controller.client.MessageSeverity;
-import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.as.controller.client.OperationMessageHandler;
-import org.jboss.as.controller.client.helpers.ClientConstants;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.registry.AttributeAccess;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.as.controller.registry.Resource;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
-import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 
 public class ServerDefinition extends SimpleResourceDefinition {
 
-	public static final ServerDefinition INSTANCE = new ServerDefinition();
+    public static final ServerDefinition INSTANCE = new ServerDefinition();
 
-	private static final Logger log = Logger.getLogger(ServerDefinition.class);
-
-    protected static final SimpleAttributeDefinition POLICY =
-            new SimpleAttributeDefinitionBuilder("policy", ModelType.STRING)
-                    .setAllowExpression(true)
-                    .setXmlName("policy")
-                    .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
-                    .setDefaultValue(null)
-                    .setAllowNull(true)
-                    .build();
+    protected static final SimpleAttributeDefinition POLICY = new SimpleAttributeDefinitionBuilder("policy", ModelType.STRING)
+            .setAllowExpression(true).setXmlName("policy").setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
+            .setDefaultValue(null).setAllowNull(true).build();
 
     private ServerDefinition() {
-        super(JsmPolicyExtension.SERVER_PATH,
-                JsmPolicyExtension.getResourceDescriptionResolver("server"),
-                ServerAdd.INSTANCE,
+        super(JsmPolicyExtension.SERVER_PATH, JsmPolicyExtension.getResourceDescriptionResolver("server"), ServerAdd.INSTANCE,
                 ServerRemove.INSTANCE);
     }
 
@@ -56,12 +37,14 @@ public class ServerDefinition extends SimpleResourceDefinition {
         resourceRegistration.registerReadWriteAttribute(POLICY, null, ServerWriteAttributeHandler.INSTANCE);
     }
 
-    public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicy) throws OperationFailedException {
+    public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicy)
+            throws OperationFailedException {
 
-        String changedServer = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        String policy = (newPolicy==null || newPolicy.getType()==ModelType.UNDEFINED) ? null : newPolicy.asString();
+        String changedServer = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement()
+                .getValue();
+        String policy = (newPolicy == null || newPolicy.getType() == ModelType.UNDEFINED) ? null : newPolicy.asString();
 
-        if(System.getProperty("jboss.server.name").equals(changedServer)){
+        if (System.getProperty("jboss.server.name").equals(changedServer)) {
             String policyContent = getPolicyContent(context, policy);
             PolicyManager.INSTANCE.setPolicyFile(policyContent);
         }
@@ -69,7 +52,8 @@ public class ServerDefinition extends SimpleResourceDefinition {
     }
 
     protected static String getPolicyContent(OperationContext context, String policy) throws OperationFailedException {
-        if(policy==null) return null;
+        if (policy == null)
+            return null;
 
         ModelNode address = new ModelNode();
         address.add("subsystem", "jsmpolicy");
@@ -77,12 +61,13 @@ public class ServerDefinition extends SimpleResourceDefinition {
         Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
         ModelNode fileNode = resource.getModel().get("file");
 
-        if(fileNode.getType()==ModelType.UNDEFINED){
+        if (fileNode.getType() == ModelType.UNDEFINED) {
             return null;
-        }else if(fileNode.getType()==ModelType.STRING || fileNode.getType()==ModelType.EXPRESSION){
+        } else if (fileNode.getType() == ModelType.STRING || fileNode.getType() == ModelType.EXPRESSION) {
             return fileNode.asString();
-        }else{
-            throw new OperationFailedException("Type of attributte file value is unexpected - "+fileNode.getType().toString());
+        } else {
+            throw new OperationFailedException("Type of attributte file value is unexpected - " +
+                    fileNode.getType().toString());
         }
     }
 
@@ -90,10 +75,13 @@ public class ServerDefinition extends SimpleResourceDefinition {
 
         public static final ServerAdd INSTANCE = new ServerAdd();
 
-        private ServerAdd() {}
+        private ServerAdd() {
+        }
 
         protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+
             ServerDefinition.POLICY.validateAndSet(operation, model);
+
         }
 
         protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
@@ -105,14 +93,18 @@ public class ServerDefinition extends SimpleResourceDefinition {
         }
     }
 
-    static class ServerRemove extends AbstractRemoveStepHandler{
+    static class ServerRemove extends AbstractRemoveStepHandler {
 
         public static final ServerRemove INSTANCE = new ServerRemove();
 
-        private ServerRemove() {}
+        private ServerRemove() {
+        }
 
-        protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
+        protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
+                throws OperationFailedException {
+
             useNewSettings(context, operation, null);
+
         }
     }
 
@@ -125,20 +117,26 @@ public class ServerDefinition extends SimpleResourceDefinition {
         }
 
         protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
-                                               ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder) throws OperationFailedException {
+                ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<Void> handbackHolder)
+                throws OperationFailedException {
+
             useNewSettings(context, operation, resolvedValue);
+
             return false; // restart not required
         }
 
         /**
          * Hook to allow subclasses to revert runtime changes
+         *
          * @param valueToRestore the previous value for the attribute, before this operation was executed
-         * @param valueToRevert  the new value for the attribute that should be reverted
+         * @param valueToRevert the new value for the attribute that should be reverted
          * @throws OperationFailedException
          */
         protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
-                                             ModelNode valueToRestore, ModelNode valueToRevert, Void handback) throws OperationFailedException {
+                ModelNode valueToRestore, ModelNode valueToRevert, Void handback) throws OperationFailedException {
+
             useNewSettings(context, operation, valueToRestore);
+
         }
     }
 }

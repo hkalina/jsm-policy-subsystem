@@ -10,6 +10,7 @@ import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.KernelServices;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
+import org.junit.Before;
 import org.junit.Test;
 import org.picketbox.jsmpolicy.subsystem.extension.JsmPolicyExtension;
 
@@ -17,7 +18,9 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
 
 /**
  * Unit test case of reading subsystem configuration from the XML
+ *
  * @author <a href="xkalin03@stud.fit.vutbr.cz">Jan Kalina</a>
+ * According example subsystem test by
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  */
 public class SubsystemParserTestCase extends AbstractSubsystemTest {
@@ -26,18 +29,18 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
         super(JsmPolicyExtension.SUBSYSTEM_NAME, new JsmPolicyExtension());
     }
 
+    @Before
+    public void before() {
+        System.setProperty("jboss.modules.policy-refreshable", "true");
+    }
+
     @Test
     public void testParseFullSubsystem() throws Exception {
 
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "   <servers>" +
-                "       <server name=\"test-server\" policy=\"test-policy\"/>" +
-                "   </servers>" +
-                "   <policies>" +
-                "       <policy name=\"test-policy\" file=\"grant { permission java.security.AllPermission; };\"/>" +
-                "   </policies>" +
-                "</subsystem>";
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "   <servers>"
+                + "       <server name=\"test-server\" policy=\"test-policy\"/>" + "   </servers>" + "   <policies>"
+                + "       <policy name=\"test-policy\" file=\"grant { permission java.security.AllPermission; };\"/>"
+                + "   </policies>" + "</subsystem>";
 
         // this test check operations created by parsing subsystem XML
         List<ModelNode> operations = super.parse(subsystemXml);
@@ -81,15 +84,9 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
     @Test
     public void testParseFullUndefinedSubsystem() throws Exception {
 
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "   <servers>" +
-                "       <server name=\"test-server\"/>" +
-                "   </servers>" +
-                "   <policies>" +
-                "       <policy name=\"test-policy\"/>" +
-                "   </policies>" +
-                "</subsystem>";
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "   <servers>"
+                + "       <server name=\"test-server\"/>" + "   </servers>" + "   <policies>"
+                + "       <policy name=\"test-policy\"/>" + "   </policies>" + "</subsystem>";
 
         // this test check operations created by parsing subsystem XML
         List<ModelNode> operations = super.parse(subsystemXml);
@@ -133,13 +130,8 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
     @Test
     public void testParseBlankGroupsSubsystem() throws Exception {
 
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "   <servers>" +
-                "   </servers>" +
-                "   <policies>" +
-                "   </policies>" +
-                "</subsystem>";
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "   <servers>" + "   </servers>"
+                + "   <policies>" + "   </policies>" + "</subsystem>";
 
         // this test check operations created by parsing subsystem XML
         List<ModelNode> operations = super.parse(subsystemXml);
@@ -159,9 +151,7 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
     @Test
     public void testParseBlankSubsystem() throws Exception {
 
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "</subsystem>";
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "</subsystem>";
 
         // this test check operations created by parsing subsystem XML
         List<ModelNode> operations = super.parse(subsystemXml);
@@ -181,12 +171,12 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
     @Test
     public void testParseMultilinePolicySubsystem() throws Exception {
 
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "   <policies>" +
-                "       <policy name=\"test-policy\" file=\"grant {&#xa;    permission java.security.AllPermission;&#xa;};\"/>" +
-                "   </policies>" +
-                "</subsystem>";
+        String subsystemXml = "<subsystem xmlns=\""
+                + JsmPolicyExtension.NAMESPACE
+                + "\">"
+                + "   <policies>"
+                + "       <policy name=\"test-policy\" file=\"grant {&#xa;    permission java.security.AllPermission;&#xa;};\"/>"
+                + "   </policies>" + "</subsystem>";
 
         // this test check operations created by parsing subsystem XML
         List<ModelNode> operations = super.parse(subsystemXml);
@@ -201,21 +191,16 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
 
     @Test
     public void testInstallIntoController() throws Exception {
-        //Parse the subsystem xml and install into the controller
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "   <servers>" +
-                "       <server name=\"test-server\" policy=\"test-policy\"/>" +
-                "   </servers>" +
-                "   <policies>" +
-                "       <policy name=\"test-policy\" file=\"grant { permission java.security.AllPermission; };\"/>" +
-                "   </policies>" +
-                "</subsystem>";
+        // Parse the subsystem xml and install into the controller
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "   <servers>"
+                + "       <server name=\"test-server\" policy=\"test-policy\"/>" + "   </servers>" + "   <policies>"
+                + "       <policy name=\"test-policy\" file=\"grant { permission java.security.AllPermission; };\"/>"
+                + "   </policies>" + "</subsystem>";
 
-        System.setProperty("jboss.server.name","testing-server");
+        System.setProperty("jboss.server.name", "testing-server");
         KernelServices services = super.installInController(subsystemXml);
 
-        //Read the whole model and make sure it looks as expected
+        // Read the whole model and make sure it looks as expected
         ModelNode model = services.readWholeModel();
 
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(JsmPolicyExtension.SUBSYSTEM_NAME));
@@ -223,73 +208,65 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("server"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server").hasDefined("test-server"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server").hasDefined("policy"));
-        Assert.assertEquals("test-policy", model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString());
+        Assert.assertEquals("test-policy",
+                model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString());
 
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("policy"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy").hasDefined("test-policy"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy").hasDefined("file"));
-        Assert.assertEquals("grant { permission java.security.AllPermission; };", model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy", "file").asString());
+        Assert.assertEquals("grant { permission java.security.AllPermission; };",
+                model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy", "file").asString());
 
     }
 
     @Test
     public void testDescribeHandler() throws Exception {
-        //Parse the subsystem xml and install into the first controller
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "</subsystem>";
+        // Parse the subsystem xml and install into the first controller
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "</subsystem>";
 
-        System.setProperty("jboss.server.name","testing-server");
+        System.setProperty("jboss.server.name", "testing-server");
         KernelServices servicesA = super.installInController(subsystemXml);
 
-        //Get the model and the describe operations from the first controller
+        // Get the model and the describe operations from the first controller
         ModelNode modelA = servicesA.readWholeModel();
         ModelNode describeOp = new ModelNode();
         describeOp.get(OP).set(DESCRIBE);
-        describeOp.get(OP_ADDR).set(PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME)).toModelNode());
+        describeOp.get(OP_ADDR).set(
+                PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME)).toModelNode());
 
         List<ModelNode> operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();
 
-        //Install the describe options from the first controller into a second controller
+        // Install the describe options from the first controller into a second controller
         KernelServices servicesB = super.installInController(operations);
         ModelNode modelB = servicesB.readWholeModel();
 
-        //Make sure the models from the two controllers are identical
+        // Make sure the models from the two controllers are identical
         super.compare(modelA, modelB);
     }
 
     @Test
     public void testSubsystemRemoval() throws Exception {
-        //Parse the subsystem xml and install into the first controller
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "   <servers>" +
-                "       <server name=\"test-server\" policy=\"test.policy\"/>" +
-                "   </servers>" +
-                "</subsystem>";
+        // Parse the subsystem xml and install into the first controller
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "   <servers>"
+                + "       <server name=\"test-server\" policy=\"test.policy\"/>" + "   </servers>" + "</subsystem>";
 
-        System.setProperty("jboss.server.name","testing-server");
+        System.setProperty("jboss.server.name", "testing-server");
         KernelServices services = super.installInController(subsystemXml);
         super.assertRemoveSubsystemResources(services);
     }
 
     @Test
     public void testExecuteOperations() throws Exception {
-        String subsystemXml =
-                "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" +
-                "   <policies>" +
-                "       <policy name=\"first-policy\" file=\"grant {};\"/>" +
-                "   </policies>" +
-                "</subsystem>";
+        String subsystemXml = "<subsystem xmlns=\"" + JsmPolicyExtension.NAMESPACE + "\">" + "   <policies>"
+                + "       <policy name=\"first-policy\" file=\"grant {};\"/>" + "   </policies>" + "</subsystem>";
 
-        System.setProperty("jboss.server.name","testing-server");
+        System.setProperty("jboss.server.name", "testing-server");
         KernelServices services = super.installInController(subsystemXml);
 
         // Add new policy
         PathAddress newPolicyAddr = PathAddress.pathAddress(
-            PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME),
-            PathElement.pathElement("policy", "test-policy")
-        );
+                PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME),
+                PathElement.pathElement("policy", "test-policy"));
         ModelNode addNewPolicyOp = new ModelNode();
         addNewPolicyOp.get(OP).set(ADD);
         addNewPolicyOp.get(OP_ADDR).set(newPolicyAddr.toModelNode());
@@ -299,9 +276,8 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
 
         // Add new server
         PathAddress newServerAddr = PathAddress.pathAddress(
-            PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME),
-            PathElement.pathElement("server", "test-server")
-        );
+                PathElement.pathElement(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME),
+                PathElement.pathElement("server", "test-server"));
         ModelNode addNewServerOp = new ModelNode();
         addNewServerOp.get(OP).set(ADD);
         addNewServerOp.get(OP_ADDR).set(newServerAddr.toModelNode());
@@ -314,11 +290,13 @@ public class SubsystemParserTestCase extends AbstractSubsystemTest {
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("policy"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy").hasDefined("test-policy"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy").hasDefined("file"));
-        Assert.assertEquals("grant { permission java.security.AllPermission; };",model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy", "file").asString());
+        Assert.assertEquals("grant { permission java.security.AllPermission; };",
+                model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "policy", "test-policy", "file").asString());
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME).hasDefined("server"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server").hasDefined("test-server"));
         Assert.assertTrue(model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server").hasDefined("policy"));
-        Assert.assertEquals("test-policy",model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString());
+        Assert.assertEquals("test-policy",
+                model.get(SUBSYSTEM, JsmPolicyExtension.SUBSYSTEM_NAME, "server", "test-server", "policy").asString());
 
         // Write-attribute file of policy
         ModelNode writePolicyOp = new ModelNode();

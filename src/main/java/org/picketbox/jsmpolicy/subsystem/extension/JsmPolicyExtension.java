@@ -24,15 +24,12 @@ import org.jboss.as.controller.persistence.SubsystemMarshallingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
-import org.jboss.logging.Logger;
 import org.jboss.staxmapper.XMLElementReader;
 import org.jboss.staxmapper.XMLElementWriter;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
 import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
 public class JsmPolicyExtension implements Extension {
-
-    private static final Logger log = Logger.getLogger(JsmPolicyExtension.class);
 
     public static final String NAMESPACE = "urn:org.picketbox.jsmpolicy:1.0";
     public static final String SUBSYSTEM_NAME = "jsmpolicy";
@@ -45,7 +42,8 @@ public class JsmPolicyExtension implements Extension {
 
     static StandardResourceDescriptionResolver getResourceDescriptionResolver(final String keyPrefix) {
         String prefix = SUBSYSTEM_NAME + (keyPrefix == null ? "" : "." + keyPrefix);
-        return new StandardResourceDescriptionResolver(prefix, RESOURCE_NAME, JsmPolicyExtension.class.getClassLoader(), true, false);
+        return new StandardResourceDescriptionResolver(prefix, RESOURCE_NAME, JsmPolicyExtension.class.getClassLoader(), true,
+                false);
     }
 
     public void initializeParsers(ExtensionParsingContext context) {
@@ -60,7 +58,8 @@ public class JsmPolicyExtension implements Extension {
         subsystem.registerXMLElementWriter(parser);
     }
 
-    private static class SubsystemParser implements XMLStreamConstants, XMLElementReader<List<ModelNode>>, XMLElementWriter<SubsystemMarshallingContext> {
+    private static class SubsystemParser implements XMLStreamConstants, XMLElementReader<List<ModelNode>>,
+            XMLElementWriter<SubsystemMarshallingContext> {
 
         public void readElement(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
             ParseUtils.requireNoAttributes(reader);
@@ -73,21 +72,21 @@ public class JsmPolicyExtension implements Extension {
             // reading children of "subsystem"
             while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
                 if (reader.getLocalName().equals("servers")) {
-                	// reading children of "servers"
-                	while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
+                    // reading children of "servers"
+                    while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
                         if (reader.isStartElement()) {
                             readServerElement(reader, list);
                         }
                     }
-                }else if (reader.getLocalName().equals("policies")) {
+                } else if (reader.getLocalName().equals("policies")) {
                     // reading children of "policies"
                     while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
                         if (reader.isStartElement()) {
                             readPolicyElement(reader, list);
                         }
                     }
-                }else{
-                	throw ParseUtils.unexpectedElement(reader);
+                } else {
+                    throw ParseUtils.unexpectedElement(reader);
                 }
             }
         }
@@ -158,27 +157,27 @@ public class JsmPolicyExtension implements Extension {
             context.startSubsystemElement(JsmPolicyExtension.NAMESPACE, false); // goto subsystem
             ModelNode subsystem = context.getModelNode();
 
-            if(subsystem.has("server")){
+            if (subsystem.has("server")) {
                 writer.writeStartElement("servers"); // begin servers
 
                 for (Property property : subsystem.get("server").asPropertyList()) {
                     writer.writeStartElement("server"); // begin server
                     writer.writeAttribute("name", property.getName());
                     ModelNode entry = property.getValue(); // get server ModelNode
-                    if(!entry.asString().equals("undefined"))
+                    if (!entry.asString().equals("undefined"))
                         ServerDefinition.POLICY.marshallAsAttribute(entry, true, writer); // attribute policy (entry=>writer)
                     writer.writeEndElement(); // end server
                 }
                 writer.writeEndElement(); // end servers
             }
 
-            if(subsystem.has("policy")){
+            if (subsystem.has("policy")) {
                 writer.writeStartElement("policies"); // begin policies
                 for (Property property : subsystem.get("policy").asPropertyList()) {
                     writer.writeStartElement("policy"); // begin policy
                     writer.writeAttribute("name", property.getName());
                     ModelNode entry = property.getValue(); // get policy ModelNode
-                    if(!entry.asString().equals("undefined"))
+                    if (!entry.asString().equals("undefined"))
                         PolicyDefinition.FILE.marshallAsAttribute(entry, true, writer); // attribute file (entry=>writer)
                     writer.writeEndElement(); // end policy
                 }
