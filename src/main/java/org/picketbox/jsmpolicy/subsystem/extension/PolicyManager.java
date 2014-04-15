@@ -31,18 +31,15 @@ public class PolicyManager {
 	 * @throws OperationFailedException
 	 */
 	public boolean setPolicyFile(String fileContent) throws OperationFailedException {
+	    log.info("Setting of new policy:\n"+fileContent);
 
-	    System.err.println("setPolicyFile("+fileContent+")");
-
-	    /*
 	    if(isCurrentPolicyFileContent(fileContent)){
 	        log.warn("Setting of policy skipped - policy is already used");
-	        return false; // policy need not to be changed
+	        return false; // policy not need to be changed
 	    }
-	    */
 
         validatePolicyFile(fileContent);
-        log.info("Setting of policy - validation OK");
+        log.info("Setting of policy: validation OK");
 
 	    if(fileContent==null){
 	        setPolicy(null);
@@ -68,27 +65,6 @@ public class PolicyManager {
 	    return true; // policy was changed
 	}
 
-	public void enableSecurityManager(){
-	    SecurityManager sm = System.getSecurityManager();
-	    if(sm!=null){
-	        oldSecurityManager = sm;
-	        return;
-	    }
-	    if(oldSecurityManager!=null){
-	        System.setSecurityManager(oldSecurityManager);
-	    }else{
-	        WildFlySecurityManager.install();
-	    }
-	}
-
-	public void disableSecurityManager(){
-	    SecurityManager sm = System.getSecurityManager();
-	    if(sm!=null){
-	        oldSecurityManager = sm;
-	    }
-	    System.setSecurityManager(null);
-    }
-
 	/**
 	 * Set policy file used on this JVM by file URL
 	 * @param policy URL of policy file (null means disable JSM)
@@ -100,37 +76,39 @@ public class PolicyManager {
             disableSecurityManager();
         }else{
             System.setProperty("java.security.policy", policy);
-            Policy.getPolicy().refresh();
             refreshDelegatingPolicy();
-            System.err.println("refreshed "+Policy.getPolicy());
             enableSecurityManager();
         }
 	}
 
+    private void enableSecurityManager() {
+        WildFlySecurityManager.install();
+    }
+
+    private void disableSecurityManager() {
+        System.setSecurityManager(null);
+    }
+
 	public void refreshDelegatingPolicy(){
 	    Policy p = Policy.getPolicy();
+	    p.refresh();
 	    try {
             Class<?> delegatingPolicy = Class.forName("org.jboss.security.jacc.DelegatingPolicy");
             if(delegatingPolicy.isInstance(p)){
-                System.err.println("is delegating");
-
+                log.debug("Policy class is DelegatingPolicy and will be refreshed");
                 Field f = delegatingPolicy.getDeclaredField("delegate");
                 f.setAccessible(true);
                 Policy in = (Policy) f.get(p);
                 in.refresh();
-                System.err.println("refreshed delegated "+in.toString());
-
-            }else{
-                System.err.println("not delegating");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception when try refresh DelegatingPolicy", e);
         }
 	}
 
 	public boolean isCurrentPolicyFileContent(String fileContent){
 	    if(fileContent==null && currentPolicyFileContent==null) return true;
-	    if(fileContent==null && currentPolicyFileContent!=null) return false;
+	    if(fileContent==null) return false;
 	    return fileContent.equals(currentPolicyFileContent);
 	}
 

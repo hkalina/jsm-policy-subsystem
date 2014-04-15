@@ -57,16 +57,15 @@ public class ServerDefinition extends SimpleResourceDefinition {
     }
 
     public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicy) throws OperationFailedException {
+
         String changedServer = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         String policy = (newPolicy==null || newPolicy.getType()==ModelType.UNDEFINED) ? null : newPolicy.asString();
 
         if(System.getProperty("jboss.server.name").equals(changedServer)){
-
             String policyContent = getPolicyContent(context, policy);
-            boolean changed = PolicyManager.INSTANCE.setPolicyFile(policyContent);
-            if(changed && policy!=null) reloadServer();
-
+            PolicyManager.INSTANCE.setPolicyFile(policyContent);
         }
+
     }
 
     protected static String getPolicyContent(OperationContext context, String policy) throws OperationFailedException {
@@ -84,56 +83,6 @@ public class ServerDefinition extends SimpleResourceDefinition {
             return fileNode.asString();
         }else{
             throw new OperationFailedException("Type of attributte file value is unexpected - "+fileNode.getType().toString());
-        }
-    }
-
-    protected static void reloadServer() throws OperationFailedException {
-        log.info("reloading server...");
-        try{
-            final ModelControllerClient mcc = ModelControllerClient.Factory.create("localhost",9990);
-
-            ModelNode op = new ModelNode();
-            op.get("operation").set("reload");
-
-            String node = System.getProperty("jboss.node.name");
-            int separator = node.indexOf(':');
-            if(separator!=-1){ // if domain mode
-                op.get("address").add("host", node.substring(0, separator));
-                op.get("address").add("server", node.substring(separator+1));
-            }
-
-            mcc.executeAsync(op, new OperationMessageHandler() {
-                @Override
-                public void handleReport(MessageSeverity severity, String message) {
-                    switch (severity) {
-                        case ERROR:
-                            ROOT_LOGGER.error("Server reloading: "+message);
-                            break;
-                        case WARN:
-                            ROOT_LOGGER.warn("Server reloading: "+message);
-                            break;
-                        case INFO:
-                        default:
-                            ROOT_LOGGER.trace("Server reloading: "+message);
-                            break;
-                    }
-                    try {
-                        mcc.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-        catch(RuntimeException e){
-            if(e.getCause() instanceof ConnectException){
-                throw new OperationFailedException("Could not refresh server, because connect connect to the server");
-            }else{
-                throw e;
-            }
-        }
-        catch(IOException e){
-            throw new OperationFailedException("IO exception when reloading server: "+e.getLocalizedMessage(),e);
         }
     }
 
