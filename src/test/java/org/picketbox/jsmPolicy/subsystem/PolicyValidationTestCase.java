@@ -18,17 +18,22 @@ public class PolicyValidationTestCase {
 
     @Test
     public void testValidationWithUnknown() throws Exception {
-        PolicyManager.INSTANCE.validatePolicyFile("grant codeBase \"file:/dir/-\"  {\n"
-                + "    permission not.existing.Permission \"param\";\n" + "};\n"
-                + "grant codeBase \"http://server/*\", principal \"test\" {\n"
-                + "    permission really.not.existing.Permission \"param\";\n" + "};\n");
+        PolicyManager.INSTANCE.validatePolicyFile(
+                  "grant codeBase \"file:/dir/-\"  {\n"
+                + "    permission not.existing.Permission \"param\";\n"
+                + "};\n"
+                + "grant codeBase \"http://server/*\", signedBy \"nobody\", principal \"test\" {\n"
+                + "    permission really.not.existing.Permission \"param\";\n"
+                + "};\n");
     }
 
     @Test
     public void testValidationOfValidPermission() throws Exception {
-        PolicyManager.INSTANCE.validatePolicyFile("grant codeBase \"file:/home/-\" {\n"
+        PolicyManager.INSTANCE.validatePolicyFile(
+                  "grant codeBase \"file:/home/-\" {\n"
                 + "    permission java.lang.RuntimePermission \"setSecurityManager\";\n"
-                + "    permission java.security.SecurityPermission \"getPolicy\";\n" + "};\n");
+                + "    permission java.security.SecurityPermission \"getPolicy\";\n"
+                + "};\n");
     }
 
     @Test(expected = OperationFailedException.class)

@@ -57,19 +57,29 @@ public class PolicyDefinition extends SimpleResourceDefinition {
 
     private static void refreshIfServerRelated(OperationContext context, ModelNode operation, ModelNode resolvedValue)
             throws OperationFailedException {
+
         String newFileValue = resolvedValue.asString();
         String affectedPolicy = operation.get("address").get(1).get("policy").asString();
 
         ModelNode address = new ModelNode();
         address.add("subsystem", "jsmpolicy");
         address.add("server", System.getProperty("jboss.server.name"));
-        Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
-        ModelNode policyNode = resource.getModel().get("policy");
 
-        if (policyNode.getType() == ModelType.STRING || policyNode.getType() == ModelType.EXPRESSION) {
-            if(policyNode.asString().equals(affectedPolicy)){
-                log.info("Currently used policy "+affectedPolicy+" changed - refreshing...");
-                PolicyManager.INSTANCE.setPolicyFile(newFileValue);
+        try {
+            Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
+            ModelNode policyNode = resource.getModel().get("policy");
+
+            if (policyNode.getType() == ModelType.STRING || policyNode.getType() == ModelType.EXPRESSION) {
+                if(policyNode.asString().equals(affectedPolicy)){
+                    log.info("Currently used policy "+affectedPolicy+" changed - refreshing...");
+                    PolicyManager.INSTANCE.setPolicyFile(newFileValue);
+                }
+            }
+        }
+        catch (RuntimeException e) {
+            if (!e.getMessage().endsWith("not found")) { // ignore if server not exist in DMR
+                throw new OperationFailedException(
+                        "Refreshing server which using modified policy failed: " + e.getMessage(), e);
             }
         }
     }
@@ -101,9 +111,6 @@ public class PolicyDefinition extends SimpleResourceDefinition {
                 throws OperationFailedException {
 
             String deletingPolicyName = operation.get("address").get(1).get("policy").asString();
-
-            // throw new OperationFailedException("PolicyRemove affectedPolicyName: "+affectedPolicy);
-
             ModelNode address = new ModelNode();
             address.add("subsystem", "jsmpolicy");
 
@@ -116,14 +123,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
 
                 // for servers using deleting policy
                 if (serverPolicy.equals(deletingPolicyName) && serverName.equals(System.getProperty("jboss.server.name"))) {
-
-                    throw new OperationFailedException("Removing policy (" + deletingPolicyName + ") is deployed on server "
-                            + serverName);
-                    /*
-                     * log.warn("Removed policy was used on server \""+serverName+"\", this server will be deleted"); ModelNode
-                     * serverAddress = new ModelNode(); serverAddress.add("subsystem", "jsmpolicy"); serverAddress.add("server",
-                     * "serverName"); context.removeResource(PathAddress.pathAddress(address));
-                     */
+                    throw new OperationFailedException("Removing policy (" + deletingPolicyName + ") is deployed on server " + serverName);
                 }
             }
 
