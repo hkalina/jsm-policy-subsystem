@@ -10,7 +10,6 @@ import java.security.Policy;
 
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.logging.Logger;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * Mediates work between subsystem and security manager and policies
@@ -86,7 +85,7 @@ public class PolicyManager {
      * Performs enabling of security manager
      */
     private void enableSecurityManager() {
-        WildFlySecurityManager.install();
+        System.setSecurityManager(new SecurityManager());
     }
 
     /**
