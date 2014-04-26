@@ -57,7 +57,7 @@ public class SubsystemDefinition extends SimpleResourceDefinition {
                         + "JAVA_OPTS=\"$JAVA_OPTS -Djboss.modules.policy-refreshable=true\"");
             } else if (!refreshable) {
                 log.warn("JSM Policy Subsystem was installed, but changes of policies will take effect "
-                        + "only after reload of the server. For allowing immediate changes you should "
+                        + "ONLY AFTER RELOAD of the server. For allowing immediate changes you should "
                         + "set property jboss.modules.policy-refreshable to true adding following into "
                         + "your start script (e.g. standalone.sh):\n"
                         + "JAVA_OPTS=\"$JAVA_OPTS -Djboss.modules.policy-refreshable=true\"");

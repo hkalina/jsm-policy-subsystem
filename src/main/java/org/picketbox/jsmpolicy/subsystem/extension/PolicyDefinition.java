@@ -30,7 +30,8 @@ public class PolicyDefinition extends SimpleResourceDefinition {
 
     private static final Logger log = Logger.getLogger(PolicyDefinition.class);
 
-    protected static final SimpleAttributeDefinition FILE = new SimpleAttributeDefinitionBuilder("file", ModelType.STRING)
+    protected static final SimpleAttributeDefinition FILE =
+            new SimpleAttributeDefinitionBuilder("file", ModelType.STRING)
             .setAllowExpression(true).setXmlName("file").setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
             .setDefaultValue(null).setAllowNull(true).setValidator(new ParameterValidator() {
                 public void validateParameter(String parameterName, ModelNode value) throws OperationFailedException {
@@ -47,39 +48,40 @@ public class PolicyDefinition extends SimpleResourceDefinition {
             }).build();
 
     private PolicyDefinition() {
-        super(JsmPolicyExtension.POLICY_PATH, JsmPolicyExtension.getResourceDescriptionResolver("policy"), PolicyAdd.INSTANCE,
-                PolicyRemove.INSTANCE);
+        super(JsmPolicyExtension.POLICY_PATH, JsmPolicyExtension.getResourceDescriptionResolver("policy"),
+                PolicyAdd.INSTANCE, PolicyRemove.INSTANCE);
     }
 
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
         resourceRegistration.registerReadWriteAttribute(FILE, null, PolicyWriteAttributeHandler.INSTANCE);
     }
 
-    private static void refreshIfServerRelated(OperationContext context, ModelNode operation, ModelNode resolvedValue)
-            throws OperationFailedException {
+    private static void refreshIfServerRelated(OperationContext context, ModelNode operation, ModelNode resolvedValue) throws OperationFailedException {
 
-        String newFileValue = resolvedValue.asString();
-        String affectedPolicy = operation.get("address").get(1).get("policy").asString();
+        String newFileContentValue = resolvedValue.asString();
+        String affectedPolicyName = operation.get("address").get(1).get("policy").asString();
+        String thisServerName = System.getProperty("jboss.server.name");
 
         ModelNode address = new ModelNode();
         address.add("subsystem", "jsmpolicy");
-        address.add("server", System.getProperty("jboss.server.name"));
+        address.add("server", thisServerName);
 
         try {
             Resource resource = context.readResourceFromRoot(PathAddress.pathAddress(address));
             ModelNode policyNode = resource.getModel().get("policy");
 
             if (policyNode.getType() == ModelType.STRING || policyNode.getType() == ModelType.EXPRESSION) {
-                if(policyNode.asString().equals(affectedPolicy)){
-                    log.info("Currently used policy "+affectedPolicy+" changed - refreshing...");
-                    PolicyManager.INSTANCE.setPolicyFile(newFileValue);
+                if(policyNode.asString().equals(affectedPolicyName)){
+                    log.info("Currently used policy " + affectedPolicyName + " changed " +
+                        "- refreshing server " + thisServerName);
+                    PolicyManager.INSTANCE.setPolicyFile(newFileContentValue);
                 }
             }
         }
         catch (RuntimeException e) {
             if (!e.getMessage().endsWith("not found")) { // ignore if server not exist in DMR
-                throw new OperationFailedException(
-                        "Refreshing server which using modified policy failed: " + e.getMessage(), e);
+                throw new OperationFailedException("Refreshing server " + thisServerName + ", " +
+                    "because using of modified policy " + affectedPolicyName + ", failed: " + e.getMessage(), e);
             }
         }
     }
@@ -87,9 +89,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
     static class PolicyAdd extends AbstractAddStepHandler {
 
         public static final PolicyAdd INSTANCE = new PolicyAdd();
-
-        private PolicyAdd() {
-        }
+        private PolicyAdd() {}
 
         protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
             PolicyDefinition.FILE.validateAndSet(operation, model);
@@ -102,10 +102,9 @@ public class PolicyDefinition extends SimpleResourceDefinition {
     }
 
     static class PolicyRemove extends AbstractRemoveStepHandler {
-        public static final PolicyRemove INSTANCE = new PolicyRemove();
 
-        private PolicyRemove() {
-        }
+        public static final PolicyRemove INSTANCE = new PolicyRemove();
+        private PolicyRemove() {}
 
         protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
                 throws OperationFailedException {
@@ -123,7 +122,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
 
                 // for servers using deleting policy
                 if (serverPolicy.equals(deletingPolicyName) && serverName.equals(System.getProperty("jboss.server.name"))) {
-                    throw new OperationFailedException("Removing policy (" + deletingPolicyName + ") is deployed on server " + serverName);
+                    throw new OperationFailedException("Removing policy " + deletingPolicyName + " failed - policy is deployed on server " + serverName);
                 }
             }
 
