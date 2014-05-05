@@ -53,7 +53,7 @@ public class PolicyDefinition extends SimpleResourceDefinition {
     }
 
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(FILE, null, PolicyWriteAttributeHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(FILE, null, PolicyWriteAttribute.INSTANCE);
     }
 
     private static void refreshIfServerRelated(OperationContext context, ModelNode operation, ModelNode resolvedValue) throws OperationFailedException {
@@ -129,11 +129,11 @@ public class PolicyDefinition extends SimpleResourceDefinition {
         }
     }
 
-    static class PolicyWriteAttributeHandler extends AbstractWriteAttributeHandler<Void> {
+    static class PolicyWriteAttribute extends AbstractWriteAttributeHandler<Void> {
 
-        public static final PolicyWriteAttributeHandler INSTANCE = new PolicyWriteAttributeHandler();
+        public static final PolicyWriteAttribute INSTANCE = new PolicyWriteAttribute();
 
-        private PolicyWriteAttributeHandler() {
+        private PolicyWriteAttribute() {
             super(PolicyDefinition.FILE);
         }
 

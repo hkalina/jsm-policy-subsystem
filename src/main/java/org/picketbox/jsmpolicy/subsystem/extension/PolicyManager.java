@@ -73,26 +73,12 @@ public class PolicyManager {
     public void setPolicy(String policy) throws OperationFailedException {
         log.info("Setting of policy from file " + policy);
         if (policy == null) {
-            disableSecurityManager();
+            System.setSecurityManager(null);
         } else {
             System.setProperty("java.security.policy", policy);
-            refreshDelegatingPolicy();
-            enableSecurityManager();
+            refreshDelegatingPolicy(); // DelegatingPolicy.delegate.refresh()
+            System.setSecurityManager(new SecurityManager());
         }
-    }
-
-    /**
-     * Performs enabling of security manager
-     */
-    private void enableSecurityManager() {
-        System.setSecurityManager(new SecurityManager());
-    }
-
-    /**
-     * Performs disabling of security manager
-     */
-    private void disableSecurityManager() {
-        System.setSecurityManager(null);
     }
 
     /**
@@ -101,7 +87,7 @@ public class PolicyManager {
      */
     private void refreshDelegatingPolicy() {
         Policy p = Policy.getPolicy();
-        p.refresh();
+        p.refresh(); // standard policy refresh
         try {
             Class<?> delegatingPolicy = Class.forName("org.jboss.security.jacc.DelegatingPolicy");
             if (delegatingPolicy.isInstance(p)) {

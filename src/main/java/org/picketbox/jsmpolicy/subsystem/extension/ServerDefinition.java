@@ -34,7 +34,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
     }
 
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(POLICY, null, ServerWriteAttributeHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(POLICY, null, ServerWriteAttribute.INSTANCE);
     }
 
     public static void useNewSettings(OperationContext context, ModelNode operation, ModelNode newPolicy)
@@ -108,11 +108,11 @@ public class ServerDefinition extends SimpleResourceDefinition {
         }
     }
 
-    static class ServerWriteAttributeHandler extends AbstractWriteAttributeHandler<Void> {
+    static class ServerWriteAttribute extends AbstractWriteAttributeHandler<Void> {
 
-        public static final ServerWriteAttributeHandler INSTANCE = new ServerWriteAttributeHandler();
+        public static final ServerWriteAttribute INSTANCE = new ServerWriteAttribute();
 
-        private ServerWriteAttributeHandler() {
+        private ServerWriteAttribute() {
             super(ServerDefinition.POLICY);
         }
 
