@@ -14,37 +14,21 @@ Successful changing of policy require also this patch of WildFly:
 
 ## Installation of jsm-policy-subsystem ##
 
-1. Install [security-manager](https://github.com/honza889/security-manager) patch into WildFly installation
-2. Add into **standalone.sh** or **domain.sh** for using PolicyFile permission in `ModuleClassLoader`:
-
+1. Install [jboss-modules](https://github.com/honza889/jboss-modules) patch into WildFly installation and allow it by adding of following at begining of **standalone.sh** or **domain.sh** for using dynamic permission in `ModuleClassLoader`:
   ```
-  JAVA_OPTS="$JAVA_OPTS -Djboss.modules.policy-permissions=true"
+  JAVA_OPTS="$JAVA_OPTS -Djboss.modules.policy-refreshable=true"
   ```
-3. Do compilation: `mvn clean install`
+3. Do compilation: `mvn install`
 4. Copy target to your server: `cp -r target/module/* $(JBOSS_PATH)/modules/system/layers/base/`
-5. Add following into your **standalone.xml** or **domain.xml**:
+5. Do following for adding of **jsmpolicy** into WildFly. For domain and profile **full**:
   ```
-  <?xml version='1.0' encoding='UTF-8'?>
-  <server xmlns="urn:jboss:domain:1.4">
-      <extensions>
-          ...
-          <extension module="org.picketbox.jsmpolicy.subsystem"/>
-          ...
-      </extensions>
-      
-      <profile>
-          ...
-          <subsystem xmlns="urn:org.picketbox.jsmpolicy:1.0"></subsystem>
-          ...
-      </profile>
-  </server>
+  bin/jboss-cli.sh --connect
+  /extension=org.picketbox.jsmpolicy.subsystem:add
+  /profile=full/subsystem=jsmpolicy:add
   ```
-
-## Alternative installation ##
+  For standalone mode:
   ```
-  cp -r target/module/* $(JBOSS_PATH)/modules/system/layers/base/
-  $(JBOSS_PATH)/bin/jboss-cli.sh
-  [standalone@localhost:9999 /] /extension=org.picketbox.jsmpolicy.subsystem:add
-  [standalone@localhost:9999 /] /subsystem=jsmpolicy:add
+  bin/jboss-cli.sh --connect
+  /extension=org.picketbox.jsmpolicy.subsystem:add
+  /subsystem=jsmpolicy:add
   ```
-
